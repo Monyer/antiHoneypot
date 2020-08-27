@@ -48,10 +48,15 @@ function _greenLight(details) {
   } = _getDomain(details.initiator);
 
   let {
-    topDomain: urlTopDomain
+    topDomain: urlTopDomain,
+    domain: urlDomain
   } = _getDomain(details.url);
   //域名相同不拦截，顶级域名相同不拦截。
   if (initiatorTopDomain == urlTopDomain) {
+    return true;
+  }
+  let whiteDomains = ['translate.googleapis.com'];
+  if (whiteDomains.includes(urlDomain)) {
     return true;
   }
 
