@@ -1,0 +1,45 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body{
+      width: 600px;
+      height: 400px;
+      font-size: medium;
+    }
+    div{
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <label for="">识别追踪字符串的最小长度: </label>
+    <input type="number" name="sameIdMinLength" min="1" max="256" id="sameIdMinLength">
+  </div>
+  <div>
+    <label for="">是否对跟踪标识进行通知: </label>
+    <input type="checkbox" name="sameIdAlert" id="sameIdAlert">
+  </div>
+  <div>
+    <label for="">是否对openDatabase进行通知: </label>
+    <input type="checkbox" name="openDatabaseAlert" id="openDatabaseAlert">
+  </div>
+  <div>
+    <label for="">是否对indexDB进行通知: </label>
+    <input type="checkbox" name="indexedDBAlert" id="indexedDBAlert">
+  </div>
+  <div>
+    <label for="">是否对疑似的获取指纹标识进行通知: </label>
+    <input type="checkbox" name="fingerPrintAlert" id="fingerPrintAlert">
+  </div>
+  <div>
+    <label for="">不进行阻断，只移除请求中的Cookie: </label>
+    <input type="checkbox" name="doNotBlockButRemoveCookie" id="doNotBlockButRemoveCookie">
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

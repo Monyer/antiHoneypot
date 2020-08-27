@@ -1,0 +1,59 @@
+{
+    "manifest_version": 2,
+    "name": "AntiHoneypot",
+    "version": "0.1.0",
+    "description": "蜜罐识别和JSONP阻断",
+    "browser_action": {
+        "default_icon": "icon/icon64b.png",
+        "default_title": "一个蜜罐识别和JSONP阻断程序",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "page": "background.html"
+    },
+    "content_scripts": [
+        {
+            "all_frames": true,
+            "js": [
+                "CopyCode/Canvas-Fingerprint-Defender/inject.js",
+                "CopyCode/Font-Fingerprint-Defender/inject.js",
+                "CopyCode/WebGL-Fingerprint-Defender/inject.js",
+                "CopyCode/AudioContext-Fingerprint-Defender/inject.js",
+                "content-script-start.js"
+            ],
+            "match_about_blank": true,
+            "matches": [
+                "*://*/*"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "all_frames": true,
+            "js": [
+                "content-script-end.js"
+            ],
+            "match_about_blank": true,
+            "matches": [
+                "*://*/*"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "options_ui": {
+        "page": "options.html",
+        "chrome_style": true
+    },
+    "permissions": [
+        "*://*/*",
+        "tabs",
+        "activeTab",
+        "storage",
+        "cookies",
+        "webRequest",
+        "webRequestBlocking",
+        "webNavigation",
+        "notifications"
+    ],
+    "incognito": "spanning",
+    "homepage_url": "https://www.monyer.com"
+}
