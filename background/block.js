@@ -111,6 +111,8 @@ function _checkIfUrlBlack(details) {
   let {
     domain: urlDomain
   } = _getDomain(url);
+  //TODO:可以增加一个规则，如果没有Cookie字段则放行。
+  //   console.log(details);
 
   //ban掉URL中所有打中关键词。
   if (['script', 'xmlhttprequest', 'sub_frame'].includes(details.type)) {

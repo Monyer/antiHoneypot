@@ -83,7 +83,7 @@ if (document.documentElement.dataset.fbscriptallow !== "true") {
 
 
 window.addEventListener("message", function(e) {
-  if (e.data && e.data === "webgl-fingerprint-defender-alert" &&
+  if (e.data && e.data === "font-fingerprint-defender-alert" &&
     typeof chrome.app.isInstalled !== 'undefined') {
     chrome.runtime.sendMessage({
       "fingerprint": 'font'

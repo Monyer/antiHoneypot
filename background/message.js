@@ -40,6 +40,11 @@ function onMessageCallback(request, sender, sendResponse) {
     domain: urlDomain
   } = _getDomain(sender.url);
 
+  //如果是排除的白名单域名，则放行
+  if (GLOBAL.exceptDomains.includes(urlDomain)) {
+    return;
+  }
+
   //试验性质的功能，check evercookie。比较localStorage、sessionStorage、cookies
   if (request.ls !== undefined && request.ss !== undefined) {
     chrome.cookies.getAll({
@@ -100,7 +105,7 @@ function onMessageCallback(request, sender, sendResponse) {
           type: 'basic',
           iconUrl: 'icon/icon128.png',
           title: 'AntiHoneypot提醒',
-          message: '这个网页有指纹识别功能，有可能是蜜罐，请小心！' + sender.url
+          message: '这个网页有指纹识别功能，请小心！' + sender.url
         });
       }
 
@@ -116,7 +121,7 @@ function onMessageCallback(request, sender, sendResponse) {
       type: 'basic',
       iconUrl: 'icon/icon128.png',
       title: 'AntiHoneypot提醒',
-      message: '这个网页有FingerPrint2指纹识别程序，应该是个蜜罐，请小心！' + sender.url
+      message: '这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url
     });
   }
 
