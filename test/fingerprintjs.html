@@ -1,0 +1,29 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"
+    integrity="sha512-n9OoMZw+LpkURqH5ODKhxjs08ZI97Pi4pIxEnqz2mHhzZmjW7UeOm/0+lvSjQ6lepdpGkPA7L8chC0UtUbXxZg=="
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <script>
+    if (window.requestIdleCallback) {
+      requestIdleCallback(function () {
+        Fingerprint2.get(function (components) {
+          console.log(components) // an array of components: {key: ..., value: ...}
+        })
+      })
+    } else {
+      setTimeout(function () {
+        Fingerprint2.get(function (components) {
+          console.log(components) // an array of components: {key: ..., value: ...}
+        })
+      }, 500)
+    }
+  </script>
+</body>
+</html>
