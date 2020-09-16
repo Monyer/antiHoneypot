@@ -1,0 +1,55 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard test</title>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+    <style>
+        #div1,
+        #div2 {
+            width: 100px;
+            height: 50px;
+            padding: 10px;
+            border: 1px solid #aaaaaa;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>执行复制粘贴操作</h3>
+    <div id="notice"></div>
+    <br/>
+    <strong>规避：需要规避掉drop中用到的dataTransfer。这里发现drop中的effectAllowed为all</strong>
+    <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <span id="drag" draggable="true" ondragstart="drag(event)">drag me to the other box</span>
+    </div>
+    <div id="div2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    <script>
+      //需要规避drop的dataTransfer
+        function allowDrop(allowdropevent) {
+            allowdropevent.target.style.color = 'blue';
+            allowdropevent.preventDefault();
+        }
+
+        function drag(dragevent) {
+            dragevent.dataTransfer.setData("text", dragevent.target.id);
+            dragevent.target.style.color = 'green';
+        }
+
+        function drop(dropevent) {
+            dropevent.preventDefault();
+            var data = dropevent.dataTransfer.getData("text");
+            console.log(dropevent.dataTransfer);
+            dropevent.target.appendChild(document.getElementById(data));
+            document.getElementById("drag").style.color = 'black';
+        }
+
+        //从剪切板取值
+        document.addEventListener('paste', function(e) {
+          document.getElementById("notice").innerHTML = "从剪切板取值："+e.clipboardData.getData('text/plain');
+        });
+    </script>
+</body>
+
+</html>

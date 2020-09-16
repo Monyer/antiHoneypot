@@ -9,8 +9,8 @@ function getCurrentTab(callback) {
   }, function(tabs) {
     if (callback) {
       callback(tabs.length ? tabs[0] : null);
-      if (!tabs[0].id) {
-        console("getCurrentTab no tabId", tabs);
+      if (!tabs[0] || !tabs[0].id) {
+        console.log("getCurrentTab no tabId", tabs);
       }
     }
   });

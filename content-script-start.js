@@ -15,6 +15,15 @@ var injectStart = function() {
     }
   });
 
+  //劫持clipboard的粘贴事件，但是不劫持drop的事件（通过uninitialized，两者都用DataTransfer）
+  const dcGetData = DataTransfer.prototype.getData;
+  DataTransfer.prototype.getData = function() {
+    if (this.effectAllowed == "uninitialized") {
+      window.top.postMessage("getClipboard-alert", '*');
+    }
+    return dcGetData.apply(this, arguments);
+  };
+
   document.documentElement.dataset.odbscriptallow = "true";
 };
 
@@ -42,16 +51,23 @@ if (document.documentElement.dataset.odbscriptallow !== "true") {
 }
 
 window.addEventListener("message", function(e) {
-  if (e.data && e.data === "openDatabase-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "openDatabase": true
-    });
+  if (e.data && typeof chrome.app.isInstalled !== 'undefined') {
+    if (e.data === "openDatabase-alert") {
+      chrome.runtime.sendMessage({
+        "openDatabase": true
+      });
+    }
+    if (e.data === "indexedDB-alert") {
+      chrome.runtime.sendMessage({
+        "indexedDB": true
+      });
+    }
+    if (e.data === "getClipboard-alert") {
+      chrome.runtime.sendMessage({
+        "getClipboard": true
+      });
+    }
+
   }
-  if (e.data && e.data === "indexedDB-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "indexedDB": true
-    });
-  }
+
 }, false);
