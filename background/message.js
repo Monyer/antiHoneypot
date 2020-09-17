@@ -85,7 +85,7 @@ function onMessageCallback(request, sender, sendResponse) {
       type: 'basic',
       iconUrl: 'icon/icon128.png',
       title: 'AntiHoneypot提醒',
-      message: msg + sender.url
+      message: msg + sender.url + Object.values(request.msgData).join(",")
     });
   }
   //getClipboard

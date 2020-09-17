@@ -45,6 +45,32 @@ if (document.documentElement.dataset.csescriptallow !== "true") {
   window.top.document.documentElement.appendChild(scriptEnd_2);
 }
 
+// //枚举indexDB
+// indexedDB.databases().then(function(dbs) {
+//   dbs.forEach(oneDB => {
+//     var request = window.indexedDB.open(oneDB.name, oneDB.version);
+//     request.onsuccess = function(e) {
+//       var db = request.result;
+//       stores = db.objectStoreNames;
+//       Object.keys(stores).forEach(idx => {
+//         storeName = stores[idx];
+//         var objectStore = db.transaction(storeName).objectStore(storeName);
+//         objectStore.openCursor().onsuccess = function(event) {
+//           var cursor = event.target.result;
+//           if (cursor) {
+//             Object.keys(cursor.value).forEach(key => {
+//               if (cursor.value[key]) {
+//                 console.log(cursor.value[key]);
+//               }
+//             });
+//             cursor.continue();
+//           }
+//         }
+//       });
+//     }
+//   });
+// });
+
 //send localStorage\sessionStorage
 if (typeof chrome.app.isInstalled !== 'undefined') {
   setTimeout(() => {
@@ -59,13 +85,3 @@ if (typeof chrome.app.isInstalled !== 'undefined') {
     });
   }, 10);
 }
-
-window.addEventListener("message", function(e) {
-  if (!e.data || !e.data.msgType || typeof chrome.app.isInstalled == 'undefined') {
-    return;
-  }
-  chrome.runtime.sendMessage({
-    msgType: e.data.msgType,
-    msgData: e.data.msgData
-  });
-});

@@ -10,14 +10,15 @@ var injectStart = function() {
   }
 
   //劫持indexedDB
-  const idxDbOpen = indexedDB.__proto__.open;
-  Object.defineProperty(indexedDB.__proto__, "open", {
-    "value": function() {
+  ["add", "put"].forEach(func => {
+    const oldFunc = IDBObjectStore.prototype[func];
+    IDBObjectStore.prototype[func] = function() {
+      console.log(arguments[0]);
       window.top.postMessage({
         msgType: "indexedDB",
-        msgData: ""
+        msgData: arguments[0]
       }, '*');
-      return idxDbOpen.apply(this, arguments);
+      return oldFunc.apply(this, arguments);
     }
   });
 
@@ -60,13 +61,3 @@ if (document.documentElement.dataset.odbscriptallow !== "true") {
   }`;
   window.top.document.documentElement.appendChild(scriptStart_2);
 }
-
-window.addEventListener("message", function(e) {
-  if (!e.data || !e.data.msgType || typeof chrome.app.isInstalled == 'undefined') {
-    return;
-  }
-  chrome.runtime.sendMessage({
-    msgType: e.data.msgType,
-    msgData: e.data.msgData
-  });
-});

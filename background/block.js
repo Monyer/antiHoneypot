@@ -243,7 +243,7 @@ function headersReceived(details) {
   }
 
   //如果顶级域名不一致，又是以script方式加载，type为json的那么是jsonp，type为text/html的那么是动态生成的js。
-  if (['script', 'xmlhttprequest'].includes(details.type)) {
+  if ("误杀太严重，暂时屏蔽" === 0 && ['script', 'xmlhttprequest'].includes(details.type)) {
     let poweredBy = getHeader('x-powered-by');
     if (poweredBy.length !== 0) {
       setBlockInfo(details.tabId, details.url, "black header[x-powered-by]", "x-powered-by");
@@ -253,6 +253,7 @@ function headersReceived(details) {
         return cancel;
       }
     }
+
     let contentType = getHeader('content-type');
     let contentTypeBlackKeywords = ['json', 'text/html'];
     if (contentType.length !== 0 &&
