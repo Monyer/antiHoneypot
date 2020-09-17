@@ -168,6 +168,7 @@ function beforeSendHeaders(details) {
   let {
     domain: initiatorDomain
   } = _getDomain(details.initiator);
+
   //如果是排除的白名单域名，则放行
   if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
     return;
@@ -212,6 +213,7 @@ function headersReceived(details) {
   let {
     domain: initiatorDomain
   } = _getDomain(details.initiator);
+
   //如果是排除的域名，则放行
   if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
     return;
