@@ -1,17 +1,30 @@
+function tabExists(tabId, onExists, onNotExists) {
+  chrome.windows.getAll({
+    populate: true
+  }, function(windows) {
+    for (var i = 0, window; window = windows[i]; i++) {
+      for (var j = 0, tab; tab = window.tabs[j]; j++) {
+        if (tab.id == tabId) {
+          onExists && onExists(tab);
+          return;
+        }
+      }
+    }
+    onNotExists && onNotExists();
+  });
+}
 /**
  * 设置icon状态
  * @param {*} tabId 
  */
 function setIconStatus(tabId) {
-
   var badgeText = "";
   var badgeColor = [255, 255, 255, 255];
   var iconPath = {
     '48': 'icon/icon48b.png',
     '128': 'icon/icon128b.png'
   };
-  if (GLOBAL.blockTabs[tabId] &&
-    GLOBAL.blockTabs[tabId].length !== 0) {
+  if (GLOBAL.blockTabs[tabId] && GLOBAL.blockTabs[tabId].length !== 0) {
     badgeText = GLOBAL.blockTabs[tabId].length.toString();
     badgeColor = [255, 0, 0, 255];
     iconPath = {
@@ -19,21 +32,23 @@ function setIconStatus(tabId) {
       '128': 'icon/icon128.png'
     };
   }
-  chrome.tabs.get(tabId, function(tab) {
-    if (typeof tab !== 'undefined') {
-      chrome.browserAction.setBadgeText({
-        text: badgeText,
+  if (!GLOBAL.blockTabs[tabId] || GLOBAL.blockTabs[tabId].length <= 1) {
+    tabExists(tabId, function() {
+      chrome.browserAction.setIcon({
+        'path': iconPath,
         tabId: tabId
       });
       chrome.browserAction.setBadgeBackgroundColor({
         color: badgeColor,
         tabId: tabId
       });
-      chrome.browserAction.setIcon({
-        'path': iconPath,
-        tabId: tabId
-      });
-    }
+    });
+  }
+  tabExists(tabId, function() {
+    chrome.browserAction.setBadgeText({
+      text: badgeText,
+      tabId: tabId
+    });
   });
 }
 
@@ -52,7 +67,7 @@ function tabActived(activeInfo) {
  */
 function tabRemoved(tabId, removeInfo) {
   if (GLOBAL.blockTabs[tabId]) {
-    delete GLOBAL.blockTabs.tabId;
+    delete GLOBAL.blockTabs[tabId];
   }
   if (GLOBAL.fingerPrints[tabId]) {
     delete GLOBAL.fingerPrints[tabId];

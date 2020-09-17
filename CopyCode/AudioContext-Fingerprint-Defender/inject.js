@@ -1,21 +1,3 @@
-// var background = (function () {
-//   var tmp = {};
-//   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-//     for (var id in tmp) {
-//       if (tmp[id] && (typeof tmp[id] === "function")) {
-//         if (request.path === 'background-to-page') {
-//           if (request.method === id) tmp[id](request.data);
-//         }
-//       }
-//     }
-//   });
-//   /*  */
-//   return {
-//     "receive": function (id, callback) {tmp[id] = callback},
-//     "send": function (id, data) {chrome.runtime.sendMessage({"path": 'page-to-background', "method": id, "data": data})}
-//   }
-// })();
-
 var injectAudio = function() {
   const context = {
     "BUFFER": null,
@@ -26,7 +8,12 @@ var injectAudio = function() {
           const results_1 = getChannelData.apply(this, arguments);
           if (context.BUFFER !== results_1) {
             context.BUFFER = results_1;
-            window.top.postMessage("audiocontext-fingerprint-defender-alert", '*');
+            window.top.postMessage({
+              msgType: "fingerprint",
+              msgData: {
+                type: "audio"
+              }
+            }, '*');
             for (var i = 0; i < results_1.length; i += 100) {
               let index = Math.floor(Math.random() * i);
               results_1[index] = results_1[index] + Math.random() * 0.0000001;
@@ -45,7 +32,12 @@ var injectAudio = function() {
           const getFloatFrequencyData = results_2.__proto__.getFloatFrequencyData;
           Object.defineProperty(results_2.__proto__, "getFloatFrequencyData", {
             "value": function() {
-              window.top.postMessage("audiocontext-fingerprint-defender-alert", '*');
+              window.top.postMessage({
+                msgType: "fingerprint",
+                msgData: {
+                  type: "audio"
+                }
+              }, '*');
               const results_3 = getFloatFrequencyData.apply(this, arguments);
               for (var i = 0; i < arguments[0].length; i += 100) {
                 let index = Math.floor(Math.random() * i);
@@ -121,12 +113,3 @@ if (document.documentElement.dataset.acxscriptallow !== "true") {
   }`;
   window.top.document.documentElement.appendChild(scriptAudio_2);
 }
-
-window.addEventListener("message", function(e) {
-  if (e.data && e.data === "audiocontext-fingerprint-defender-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "fingerprint": 'audio'
-    });
-  }
-}, false);

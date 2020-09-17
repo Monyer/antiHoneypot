@@ -1,21 +1,3 @@
-// var background = (function () {
-//   var tmp = {};
-//   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-//     for (var id in tmp) {
-//       if (tmp[id] && (typeof tmp[id] === "function")) {
-//         if (request.path === 'background-to-page') {
-//           if (request.method === id) tmp[id](request.data);
-//         }
-//       }
-//     }
-//   });
-//   /*  */
-//   return {
-//     "receive": function (id, callback) {tmp[id] = callback},
-//     "send": function (id, data) {chrome.runtime.sendMessage({"path": 'page-to-background', "method": id, "data": data})}
-//   }
-// })();
-
 var injectFont = function() {
   var rand = {
     "noise": function() {
@@ -36,7 +18,12 @@ var injectFont = function() {
       const result = valid ? height + rand.noise() : height;
       //
       if (valid && result !== height) {
-        window.top.postMessage("font-fingerprint-defender-alert", '*');
+        window.top.postMessage({
+          msgType: "fingerprint",
+          msgData: {
+            type: "font"
+          }
+        }, '*');
       }
       //
       return result;
@@ -50,7 +37,12 @@ var injectFont = function() {
       const result = valid ? width + rand.noise() : width;
       //
       if (valid && result !== width) {
-        window.top.postMessage("font-fingerprint-defender-alert", '*');
+        window.top.postMessage({
+          msgType: "fingerprint",
+          msgData: {
+            type: "font"
+          }
+        }, '*');
       }
       //
       return result;
@@ -80,13 +72,3 @@ if (document.documentElement.dataset.fbscriptallow !== "true") {
   //
   window.top.document.documentElement.appendChild(scriptFont_2);
 }
-
-
-window.addEventListener("message", function(e) {
-  if (e.data && e.data === "font-fingerprint-defender-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "fingerprint": 'font'
-    });
-  }
-}, false);

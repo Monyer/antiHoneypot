@@ -1,29 +1,3 @@
-// var background = (function() {
-//   var tmp = {};
-//   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//     for (var id in tmp) {
-//       if (tmp[id] && (typeof tmp[id] === "function")) {
-//         if (request.path === 'background-to-page') {
-//           if (request.method === id) tmp[id](request.data);
-//         }
-//       }
-//     }
-//   });
-//   /*  */
-//   return {
-//     "receive": function(id, callback) {
-//       tmp[id] = callback
-//     },
-//     "send": function(id, data) {
-//       chrome.runtime.sendMessage({
-//         "path": 'page-to-background',
-//         "method": id,
-//         "data": data
-//       })
-//     }
-//   }
-// })();
-
 var injectCanvas = function() {
   const toBlob = HTMLCanvasElement.prototype.toBlob;
   const toDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -50,7 +24,12 @@ var injectCanvas = function() {
       }
     }
     //
-    window.top.postMessage("canvas-fingerprint-defender-alert", '*');
+    window.top.postMessage({
+      msgType: "fingerprint",
+      msgData: {
+        type: "canvas"
+      }
+    }, '*');
     context.putImageData(imageData, 0, 0);
   };
   //
@@ -101,12 +80,3 @@ if (document.documentElement.dataset.cbscriptallow !== "true") {
   //
   window.top.document.documentElement.appendChild(scriptCanvas_2);
 }
-
-window.addEventListener("message", function(e) {
-  if (e.data && e.data === "webgl-fingerprint-defender-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "fingerprint": 'canvas'
-    });
-  }
-}, false);

@@ -20,7 +20,8 @@
     <h3>执行复制粘贴操作</h3>
     <div id="notice"></div>
     <br/>
-    <strong>规避：需要规避掉drop中用到的dataTransfer。这里发现drop中的effectAllowed为all</strong>
+    <strong>规避：需要规避掉drop中用到的 dataTransfer 。
+      这里发现drop中的effectAllowed为all，而clipboard的为：uninitialized</strong>
     <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
         <span id="drag" draggable="true" ondragstart="drag(event)">drag me to the other box</span>
     </div>
@@ -47,6 +48,7 @@
 
         //从剪切板取值
         document.addEventListener('paste', function(e) {
+          console.log(e.clipboardData);
           document.getElementById("notice").innerHTML = "从剪切板取值："+e.clipboardData.getData('text/plain');
         });
     </script>

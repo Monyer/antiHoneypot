@@ -13,5 +13,5 @@ chrome.storage.local.get({
   CONF: CONF
 }, function(items) {
   CONF = items.CONF;
-  console.log(CONF);
+  //   console.log(CONF);
 });

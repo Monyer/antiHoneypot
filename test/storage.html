@@ -1,0 +1,18 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Localstorage & SessionStorage</title>
+</head>
+<body>
+  <h3>evercookie sameid: <span id="sameid"></span></h3>
+  <script>
+    var sameid = "sameid_"+(+(new Date()));
+
+    document.getElementById("sameid").innerHTML = sameid;
+    document.cookie = "sameid="+sameid;
+    localStorage.setItem("sameid",sameid);
+    sessionStorage.setItem("sameid",sameid);
+  </script>
+</body>
+</html>

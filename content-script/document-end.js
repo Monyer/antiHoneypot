@@ -1,17 +1,14 @@
-chrome.runtime.sendMessage({
-  ls: localStorage,
-  ss: sessionStorage
-});
-
 var injectEnd = function() {
   //某蜜罐用了两个全局变量：token、path。token为使用短横线链接的随机值，path为js_开头的目录
   if (window.token !== undefined && window.path !== undefined) {
     if (typeof token == "string" && token.includes("-") &&
       typeof path == "string" && path.includes("js_")) {
       document.documentElement.innerHTML = "This is a Honeypot.";
-      window.postMessage({
-        honeypot: true,
-        blockInfo: "token=" + token + " | path=" + path
+      window.top.postMessage({
+        msgType: "honeypotAlert",
+        msgData: {
+          blockInfo: "token=" + token + " | path=" + path
+        }
       }, '*');
     }
   }
@@ -19,9 +16,11 @@ var injectEnd = function() {
   var fp = Object.keys(window).filter(func => func != 'webkitStorageInfo' && typeof window[func] == "function" && window[func]['x64hash128'] && window[func]['getV18']);
 
   if (fp.length !== 0) {
-    window.postMessage({
-      fingerprint2: true,
-      fp: fp.join(',')
+    window.top.postMessage({
+      msgType: "fingerprint2",
+      msgData: {
+        fp: fp.join(',')
+      }
     }, '*');
   }
 
@@ -38,7 +37,7 @@ if (document.documentElement.dataset.csescriptallow !== "true") {
       const iframes = window.top.document.querySelectorAll("iframe[sandbox]");
       for (var i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow) {
-            iframes[i].contentWindow.uhpInject = ${inject};
+            iframes[i].contentWindow.uhpInject = ${injectEnd};
             uhpInject();
         }
       }
@@ -46,18 +45,27 @@ if (document.documentElement.dataset.csescriptallow !== "true") {
   window.top.document.documentElement.appendChild(scriptEnd_2);
 }
 
+//send localStorage\sessionStorage
+if (typeof chrome.app.isInstalled !== 'undefined') {
+  setTimeout(() => {
+    let ls = localStorage || {};
+    let ss = sessionStorage || {};
+    chrome.runtime.sendMessage({
+      msgType: "getStorage",
+      msgData: {
+        ls: ls,
+        ss: ss
+      }
+    });
+  }, 10);
+}
+
 window.addEventListener("message", function(e) {
-  if (e.data && e.data.honeypot !== undefined) {
-    console.log("这是一个蜜罐");
-    chrome.runtime.sendMessage({
-      honeypot: true,
-      blockInfo: e.data.blockInfo
-    });
+  if (!e.data || !e.data.msgType || typeof chrome.app.isInstalled == 'undefined') {
+    return;
   }
-  if (e.data && e.data.fingerprint2 !== undefined) {
-    chrome.runtime.sendMessage({
-      fingerprint2: true,
-      fp: e.data.fp
-    });
-  }
-}, false);
+  chrome.runtime.sendMessage({
+    msgType: e.data.msgType,
+    msgData: e.data.msgData
+  });
+});

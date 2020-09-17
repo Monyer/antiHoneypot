@@ -45,15 +45,18 @@ function onMessageCallback(request, sender, sendResponse) {
     return;
   }
 
+  if (!request.msgType) {
+    return;
+  }
   //试验性质的功能，check evercookie。比较localStorage、sessionStorage、cookies
-  if (request.ls !== undefined && request.ss !== undefined) {
+  if (request.msgType == "getStorage") {
     chrome.cookies.getAll({
       url: sender.url
     }, cos => {
       var co_vals = [];
       cos.forEach(c => co_vals.push(c.value));
-      ls_vals = Object.values(request.ls);
-      ss_vals = Object.values(request.ss);
+      ls_vals = Object.values(request.msgData.ls);
+      ss_vals = Object.values(request.msgData.ss);
 
       sameIdCompare(ls_vals, ss_vals, urlDomain);
       sameIdCompare(co_vals, ls_vals, urlDomain);
@@ -64,7 +67,7 @@ function onMessageCallback(request, sender, sendResponse) {
 
   //content-script-start的消息
   //openDatabase
-  if (request.openDatabase !== undefined && CONF.openDatabaseAlert) {
+  if (request.msgType == "openDatabase" && CONF.openDatabaseAlert) {
     let msg = "这个网页调用了openDatabase！";
     setBlockInfo(sender.tab.id, sender.url, "openDatabase hit", msg);
     chrome.notifications.create(null, {
@@ -75,7 +78,7 @@ function onMessageCallback(request, sender, sendResponse) {
     });
   }
   //indexedDB
-  if (request.indexedDB !== undefined && CONF.indexedDBAlert) {
+  if (request.msgType == "indexedDB" && CONF.indexedDBAlert) {
     let msg = "这个网页调用了indexedDB！";
     setBlockInfo(sender.tab.id, sender.url, "indexedDB hit", msg);
     chrome.notifications.create(null, {
@@ -86,7 +89,7 @@ function onMessageCallback(request, sender, sendResponse) {
     });
   }
   //getClipboard
-  if (request.getClipboard !== undefined && CONF.getClipboardAlert) {
+  if (request.msgType == "getClipboard" && CONF.getClipboardAlert) {
     let msg = "这个网页调用了剪切板粘贴取值函数！";
     setBlockInfo(sender.tab.id, sender.url, "getClipboard hit", msg);
 
@@ -99,12 +102,12 @@ function onMessageCallback(request, sender, sendResponse) {
   }
 
   //判断是否被获取指纹，准确度不高，误报挺严重。发现不少网站会调用font、canvas、audio、webgl的相关函数
-  if (request.fingerprint !== undefined && GLOBAL.fingerPrints[sender.tab.id] !== true) {
+  if (request.msgType == "fingerprint" && GLOBAL.fingerPrints[sender.tab.id] !== true) {
     if (!GLOBAL.fingerPrints[sender.tab.id]) {
       GLOBAL.fingerPrints[sender.tab.id] = {};
     }
     var before_len = Object.keys(GLOBAL.fingerPrints[sender.tab.id]).length;
-    GLOBAL.fingerPrints[sender.tab.id][request.fingerprint] = true;
+    GLOBAL.fingerPrints[sender.tab.id][request.msgData.type] = true;
     var after_len = Object.keys(GLOBAL.fingerPrints[sender.tab.id]).length;
 
     if (before_len < 4 && after_len >= 4) {
@@ -124,8 +127,8 @@ function onMessageCallback(request, sender, sendResponse) {
   }
 
   //判断fingerPrintJs是否存在，准确率应该挺高
-  if (request.fingerprint2 !== undefined) {
-    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.fp);
+  if (request.msgType == "fingerprint2") {
+    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
     GLOBAL.fingerPrints[sender.tab.id] = true;
 
     chrome.notifications.create(null, {
@@ -137,11 +140,9 @@ function onMessageCallback(request, sender, sendResponse) {
   }
 
   //如果前端判断是蜜罐，直接后续阻断所有请求
-  if (request.honeypot !== undefined &&
-    !GLOBAL.honeypotDomains.includes(urlDomain)
-  ) {
+  if (request.msgType == "honeypotAlert" && !GLOBAL.honeypotDomains.includes(urlDomain)) {
     addHoneypotDomain(urlDomain);
-    setBlockInfo(sender.tab.id, sender.url, "honeypot frontend hit", request.blockInfo);
+    setBlockInfo(sender.tab.id, sender.url, "honeypot frontend hit", request.msgData.blockInfo);
   }
   sendResponse(true);
 }

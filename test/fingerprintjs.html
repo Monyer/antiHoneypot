@@ -10,18 +10,27 @@
 </head>
 
 <body>
+  <h3 id="fpHash"></h3>
+  <div id="result"></div>
   <script>
+    function genFingerPrint(){
+      Fingerprint2.get(function (components) {
+          console.log(components)
+          document.getElementById("result").innerHTML = JSON.stringify(components);
+
+          var values = components.map(function (component) { return component.value })
+          var murmur = Fingerprint2.x64hash128(values.join(''), 31);
+          document.getElementById("fpHash").innerHTML = murmur;
+        })
+    }
+
     if (window.requestIdleCallback) {
       requestIdleCallback(function () {
-        Fingerprint2.get(function (components) {
-          console.log(components) // an array of components: {key: ..., value: ...}
-        })
+        genFingerPrint();
       })
     } else {
       setTimeout(function () {
-        Fingerprint2.get(function (components) {
-          console.log(components) // an array of components: {key: ..., value: ...}
-        })
+        genFingerPrint();
       }, 500)
     }
   </script>

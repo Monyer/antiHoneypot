@@ -1,21 +1,3 @@
-// var background = (function () {
-//   var tmp = {};
-//   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-//     for (var id in tmp) {
-//       if (tmp[id] && (typeof tmp[id] === "function")) {
-//         if (request.path === 'background-to-page') {
-//           if (request.method === id) tmp[id](request.data);
-//         }
-//       }
-//     }
-//   });
-//   /*  */
-//   return {
-//     "receive": function (id, callback) {tmp[id] = callback},
-//     "send": function (id, data) {chrome.runtime.sendMessage({"path": 'page-to-background', "method": id, "data": data})}
-//   }
-// })();
-
 var injectWebGL = function() {
   var config = {
     "random": {
@@ -54,7 +36,12 @@ var injectWebGL = function() {
               var index = Math.floor(config.random.value() * 10);
               var noise = 0.1 * config.random.value() * arguments[1][index];
               arguments[1][index] = arguments[1][index] + noise;
-              window.top.postMessage("webgl-fingerprint-defender-alert", '*');
+              window.top.postMessage({
+                msgType: "fingerprint",
+                msgData: {
+                  type: "webgl"
+                }
+              }, '*');
               //
               return bufferData.apply(this, arguments);
             }
@@ -65,7 +52,12 @@ var injectWebGL = function() {
           Object.defineProperty(target.prototype, "getParameter", {
             "value": function() {
               var float32array = new Float32Array([1, 8192]);
-              window.top.postMessage("webgl-fingerprint-defender-alert", '*');
+              window.top.postMessage({
+                msgType: "fingerprint",
+                msgData: {
+                  type: "webgl"
+                }
+              }, '*');
               //
               if (arguments[0] === 3415) return 0;
               else if (arguments[0] === 3414) return 24;
@@ -119,13 +111,3 @@ if (document.documentElement.dataset.wgscriptallow !== "true") {
   //
   window.top.document.documentElement.appendChild(scriptWebGL_2);
 }
-
-
-window.addEventListener("message", function(e) {
-  if (e.data && e.data === "webgl-fingerprint-defender-alert" &&
-    typeof chrome.app.isInstalled !== 'undefined') {
-    chrome.runtime.sendMessage({
-      "fingerprint": 'webgl'
-    });
-  }
-}, false);

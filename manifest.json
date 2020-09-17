@@ -19,7 +19,7 @@
                 "CopyCode/Font-Fingerprint-Defender/inject.js",
                 "CopyCode/WebGL-Fingerprint-Defender/inject.js",
                 "CopyCode/AudioContext-Fingerprint-Defender/inject.js",
-                "content-script-start.js"
+                "content-script/document-start.js"
             ],
             "match_about_blank": true,
             "matches": [
@@ -30,7 +30,7 @@
         {
             "all_frames": true,
             "js": [
-                "content-script-end.js"
+                "content-script/document-end.js"
             ],
             "match_about_blank": true,
             "matches": [

@@ -2,7 +2,10 @@ var injectStart = function() {
   //劫持openDataBase
   const openDb = openDatabase;
   openDatabase = (...args) => {
-    window.top.postMessage("openDatabase-alert", '*');
+    window.top.postMessage({
+      msgType: "openDatabase",
+      msgData: ""
+    }, '*');
     return openDb(...args);
   }
 
@@ -10,7 +13,10 @@ var injectStart = function() {
   const idxDbOpen = indexedDB.__proto__.open;
   Object.defineProperty(indexedDB.__proto__, "open", {
     "value": function() {
-      window.top.postMessage("indexedDB-alert", '*');
+      window.top.postMessage({
+        msgType: "indexedDB",
+        msgData: ""
+      }, '*');
       return idxDbOpen.apply(this, arguments);
     }
   });
@@ -19,10 +25,15 @@ var injectStart = function() {
   const dcGetData = DataTransfer.prototype.getData;
   DataTransfer.prototype.getData = function() {
     if (this.effectAllowed == "uninitialized") {
-      window.top.postMessage("getClipboard-alert", '*');
+      window.top.postMessage({
+        msgType: "getClipboard",
+        msgData: ""
+      }, '*');
     }
     return dcGetData.apply(this, arguments);
   };
+
+  //
 
   document.documentElement.dataset.odbscriptallow = "true";
 };
@@ -51,23 +62,11 @@ if (document.documentElement.dataset.odbscriptallow !== "true") {
 }
 
 window.addEventListener("message", function(e) {
-  if (e.data && typeof chrome.app.isInstalled !== 'undefined') {
-    if (e.data === "openDatabase-alert") {
-      chrome.runtime.sendMessage({
-        "openDatabase": true
-      });
-    }
-    if (e.data === "indexedDB-alert") {
-      chrome.runtime.sendMessage({
-        "indexedDB": true
-      });
-    }
-    if (e.data === "getClipboard-alert") {
-      chrome.runtime.sendMessage({
-        "getClipboard": true
-      });
-    }
-
+  if (!e.data || !e.data.msgType || typeof chrome.app.isInstalled == 'undefined') {
+    return;
   }
-
-}, false);
+  chrome.runtime.sendMessage({
+    msgType: e.data.msgType,
+    msgData: e.data.msgData
+  });
+});
