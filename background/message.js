@@ -8,7 +8,7 @@ function sameIdCompare(sVals, tVals, domain) {
   var ids = sVals.filter(sVal => tVals.includes(sVal) || Object.keys(GLOBAL.sameIds).includes(sVal));
   for (let i = 0; i < ids.length; i++) {
     //如果值的长度太短了，则可能不是evercookie
-    if (ids[i].length <= CONF.sameIdMinLength) {
+    if (ids[i].length < CONF.sameIdMinLength) {
       continue;
     }
     if (!Object.keys(GLOBAL.sameIds).includes(ids[i])) {
@@ -45,23 +45,25 @@ function onMessageCallback(request, sender, sendResponse) {
     return;
   }
 
+  //未知消息忽略掉
   if (!request.msgType) {
     return;
   }
-  //试验性质的功能，check evercookie。比较localStorage、sessionStorage、cookies
-  if (request.msgType == "getStorage") {
+  //check evercookie。比较localStorage、cookies，indexedDB是响应式
+  if (["getStorage", "indexedDB"].includes(request.msgType)) {
     chrome.cookies.getAll({
       url: sender.url
     }, cos => {
       var co_vals = [];
       cos.forEach(c => co_vals.push(c.value));
       ls_vals = Object.values(request.msgData.ls);
-      ss_vals = Object.values(request.msgData.ss);
-
-      sameIdCompare(ls_vals, ss_vals, urlDomain);
       sameIdCompare(co_vals, ls_vals, urlDomain);
-      sameIdCompare(ss_vals, co_vals, urlDomain);
-      //   console.log(sameIds);
+      if (request.msgType == "indexedDB") {
+        idb_vals = Object.values(request.msgData.idb);
+        console.log(idb_vals, co_vals);
+        sameIdCompare(ls_vals, idb_vals, urlDomain);
+        sameIdCompare(idb_vals, co_vals, urlDomain);
+      }
     });
   }
 
@@ -77,17 +79,7 @@ function onMessageCallback(request, sender, sendResponse) {
       message: msg + sender.url
     });
   }
-  //indexedDB
-  if (request.msgType == "indexedDB" && CONF.indexedDBAlert) {
-    let msg = "这个网页调用了indexedDB！";
-    setBlockInfo(sender.tab.id, sender.url, "indexedDB hit", msg);
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: 'AntiHoneypot提醒',
-      message: msg + sender.url + Object.values(request.msgData).join(",")
-    });
-  }
+
   //getClipboard
   if (request.msgType == "getClipboard" && CONF.getClipboardAlert) {
     let msg = "这个网页调用了剪切板粘贴取值函数！";

@@ -45,43 +45,15 @@ if (!document.documentElement.dataset.csescriptallow) {
   window.top.document.documentElement.appendChild(scriptEnd_2);
 }
 
-// //枚举indexDB
-// indexedDB.databases().then(function(dbs) {
-//   dbs.forEach(oneDB => {
-//     var request = window.indexedDB.open(oneDB.name, oneDB.version);
-//     request.onsuccess = function(e) {
-//       var db = request.result;
-//       stores = db.objectStoreNames;
-//       Object.keys(stores).forEach(idx => {
-//         storeName = stores[idx];
-//         var objectStore = db.transaction(storeName).objectStore(storeName);
-//         objectStore.openCursor().onsuccess = function(event) {
-//           var cursor = event.target.result;
-//           if (cursor) {
-//             Object.keys(cursor.value).forEach(key => {
-//               if (cursor.value[key]) {
-//                 console.log(cursor.value[key]);
-//               }
-//             });
-//             cursor.continue();
-//           }
-//         }
-//       });
-//     }
-//   });
-// });
-
 //send localStorage\sessionStorage
 if (typeof chrome.app.isInstalled !== 'undefined') {
   setTimeout(() => {
     let ls = localStorage || {};
-    let ss = sessionStorage || {};
     chrome.runtime.sendMessage({
       msgType: "getStorage",
       msgData: {
         ls: ls,
-        ss: ss
       }
     });
-  }, 10);
+  }, 100);
 }

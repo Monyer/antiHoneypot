@@ -45,6 +45,8 @@
           email: 'lisi@example.com'
         });
 
+      document.cookie = "email=lisi@example.com";
+
       request.onsuccess = function(event) {
         console.log('数据更新成功');
       };

@@ -13,10 +13,11 @@ var injectStart = function() {
   ["add", "put"].forEach(func => {
     const oldFunc = IDBObjectStore.prototype[func];
     IDBObjectStore.prototype[func] = function() {
-      console.log(arguments[0]);
       window.top.postMessage({
         msgType: "indexedDB",
-        msgData: arguments[0]
+        msgData: {
+          idb: arguments[0],
+        }
       }, '*');
       return oldFunc.apply(this, arguments);
     }
