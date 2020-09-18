@@ -9,7 +9,7 @@ var injectStart = function() {
     return openDb(...args);
   }
 
-  //劫持indexedDB
+  //劫持indexedDB中的add和put。
   ["add", "put"].forEach(func => {
     const oldFunc = IDBObjectStore.prototype[func];
     IDBObjectStore.prototype[func] = function() {
@@ -36,7 +36,7 @@ var injectStart = function() {
 
   //
 
-  document.documentElement.dataset.odbscriptallow = "true";
+  document.documentElement.dataset.odbscriptallow = true;
 };
 
 
@@ -44,7 +44,7 @@ var scriptStart_1 = document.createElement('script');
 scriptStart_1.textContent = "(" + injectStart + ")()";
 document.documentElement.appendChild(scriptStart_1);
 
-if (document.documentElement.dataset.odbscriptallow !== "true") {
+if (!document.documentElement.dataset.odbscriptallow) {
   var scriptStart_2 = document.createElement('script');
   scriptStart_2.textContent = `{
     const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

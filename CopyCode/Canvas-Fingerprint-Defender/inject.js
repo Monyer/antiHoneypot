@@ -61,7 +61,7 @@ var scriptCanvas_1 = document.createElement('script');
 scriptCanvas_1.textContent = "(" + injectCanvas + ")()";
 document.documentElement.appendChild(scriptCanvas_1);
 
-if (document.documentElement.dataset.cbscriptallow !== "true") {
+if (!document.documentElement.dataset.cbscriptallow) {
   var scriptCanvas_2 = document.createElement('script');
   scriptCanvas_2.textContent = `{
     const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

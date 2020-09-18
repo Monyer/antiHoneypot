@@ -24,14 +24,14 @@ var injectEnd = function() {
     }, '*');
   }
 
-  document.documentElement.dataset.csescriptallow = "true";
+  document.documentElement.dataset.csescriptallow = true;
 };
 
 var scriptEnd_1 = document.createElement('script');
 scriptEnd_1.textContent = "(" + injectEnd + ")()";
 document.documentElement.appendChild(scriptEnd_1);
 
-if (document.documentElement.dataset.csescriptallow !== "true") {
+if (!document.documentElement.dataset.csescriptallow) {
   var scriptEnd_2 = document.createElement('script');
   scriptEnd_2.textContent = `{
       const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

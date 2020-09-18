@@ -65,7 +65,7 @@ var scriptAudio_1 = document.createElement('script');
 scriptAudio_1.textContent = "(" + injectAudio + ")()";
 document.documentElement.appendChild(scriptAudio_1);
 
-if (document.documentElement.dataset.acxscriptallow !== "true") {
+if (!document.documentElement.dataset.acxscriptallow) {
   var scriptAudio_2 = document.createElement('script');
   scriptAudio_2.textContent = `{
     const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

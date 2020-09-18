@@ -56,7 +56,7 @@ var scriptFont_1 = document.createElement('script');
 scriptFont_1.textContent = "(" + injectFont + ")()";
 document.documentElement.appendChild(scriptFont_1);
 
-if (document.documentElement.dataset.fbscriptallow !== "true") {
+if (!document.documentElement.dataset.fbscriptallow) {
   var scriptFont_2 = document.createElement('script');
   scriptFont_2.textContent = `{
     const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

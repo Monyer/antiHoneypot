@@ -91,7 +91,7 @@ var scriptWebGL_1 = document.createElement("script");
 scriptWebGL_1.textContent = "(" + injectWebGL + ")()";
 document.documentElement.appendChild(scriptWebGL_1);
 
-if (document.documentElement.dataset.wgscriptallow !== "true") {
+if (!document.documentElement.dataset.wgscriptallow) {
   var scriptWebGL_2 = document.createElement('script');
   scriptWebGL_2.textContent = `{
     const iframes = window.top.document.querySelectorAll("iframe[sandbox]");

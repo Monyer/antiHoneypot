@@ -138,7 +138,8 @@ function _checkIfUrlBlack(details) {
     }
 
     let blackUriKeywords = ['.json', 'jsonp'];
-    if (blockKeywords(url.split("?").slice(0, 1).join('?'), blackUriKeywords, "black url keyword", details)) {
+    if ("误杀比较严重，先屏蔽" === false &&
+      blockKeywords(url.split("?").slice(0, 1).join('?'), blackUriKeywords, "black url keyword", details)) {
       return true;
     }
 
@@ -180,6 +181,7 @@ function beforeSendHeaders(details) {
     return cancel;
   }
   //拦截URI关键词，这几个关键词是蜜罐特有的。
+  //swfobject-2.2.min.js：flash反正没啥用，先干掉，以后再说
   const mainFrameUrlBlackKeywords = ['func-sns.php', 'immortal_etag.php', 'immortal_cache.php', 'immortal_png.php', 'immortal.js', 'swfobject-2.2.min.js'];
   if (blockKeywords(url.split('?').slice(0, 1).join(), mainFrameUrlBlackKeywords,
       "main_frame url black keywords", details)) {
