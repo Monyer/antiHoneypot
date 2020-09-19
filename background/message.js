@@ -49,6 +49,7 @@ function onMessageCallback(request, sender, sendResponse) {
   if (!request.msgType) {
     return;
   }
+
   //check evercookie。比较localStorage、cookies，indexedDB是响应式
   if (["getStorage", "indexedDB", 'setlocalStorage'].includes(request.msgType)) {
     setTimeout(function() {
@@ -68,8 +69,7 @@ function onMessageCallback(request, sender, sendResponse) {
     }, 1000);
   }
 
-  //content-script-start的消息
-  //openDatabase
+  //content-script-start的消息，openDatabase
   if (request.msgType == "openDatabase" && CONF.openDatabaseAlert) {
     let msg = "这个网页调用了openDatabase！";
     setBlockInfo(sender.tab.id, sender.url, "openDatabase hit", msg);
@@ -91,6 +91,25 @@ function onMessageCallback(request, sender, sendResponse) {
       iconUrl: 'icon/icon128.png',
       title: '剪切板粘贴取值提醒',
       message: msg + sender.url
+    });
+  }
+
+  //如果前端判断是蜜罐，直接后续阻断所有请求
+  if (request.msgType == "honeypotAlert" && !GLOBAL.honeypotDomains.includes(urlDomain)) {
+    addHoneypotDomain(urlDomain);
+    setBlockInfo(sender.tab.id, sender.url, "honeypot frontend hit", request.msgData.blockInfo);
+  }
+
+  //判断fingerPrintJs是否存在，准确率应该挺高
+  if (request.msgType == "fingerprint2") {
+    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
+    GLOBAL.fingerPrints[sender.tab.id] = true;
+
+    chrome.notifications.create(null, {
+      type: 'basic',
+      iconUrl: 'icon/icon128.png',
+      title: 'AntiHoneypot提醒',
+      message: '这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url
     });
   }
 
@@ -117,25 +136,6 @@ function onMessageCallback(request, sender, sendResponse) {
       }
 
     }
-  }
-
-  //判断fingerPrintJs是否存在，准确率应该挺高
-  if (request.msgType == "fingerprint2") {
-    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
-    GLOBAL.fingerPrints[sender.tab.id] = true;
-
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: 'AntiHoneypot提醒',
-      message: '这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url
-    });
-  }
-
-  //如果前端判断是蜜罐，直接后续阻断所有请求
-  if (request.msgType == "honeypotAlert" && !GLOBAL.honeypotDomains.includes(urlDomain)) {
-    addHoneypotDomain(urlDomain);
-    setBlockInfo(sender.tab.id, sender.url, "honeypot frontend hit", request.msgData.blockInfo);
   }
   sendResponse(true);
 }
