@@ -21,13 +21,13 @@ function setIconStatus(tabId) {
   var badgeText = "";
   var badgeColor = [255, 255, 255, 255];
   var iconPath = {
-    '48': 'icon/icon48b.png'
+    '32': 'icon/icon32b.png'
   };
   if (GLOBAL.blockTabs[tabId] && GLOBAL.blockTabs[tabId].length !== 0) {
     badgeText = GLOBAL.blockTabs[tabId].length.toString();
     badgeColor = [255, 0, 0, 255];
     iconPath = {
-      '48': 'icon/icon48.png'
+      '32': 'icon/icon32.png'
     };
   }
   tabExists(tabId, function() {

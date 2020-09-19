@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "description": "蜜罐识别和JSONP阻断",
     "browser_action": {
-        "default_icon": "icon/icon64b.png",
+        "default_icon": "icon/icon32b.png",
         "default_title": "一个蜜罐识别和JSONP阻断程序",
         "default_popup": "popup.html"
     },
