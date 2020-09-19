@@ -1,3 +1,7 @@
+/**
+ * 该脚本主要是在页面加载后，判断某蜜罐的几个特征
+ * 判断fingerprintjs2的插件。
+ */
 var injectEnd = function() {
   //某蜜罐用了两个全局变量：token、path。token为使用短横线链接的随机值，path为js_开头的目录
   if (window.token !== undefined && window.path !== undefined) {

@@ -182,7 +182,7 @@ function beforeSendHeaders(details) {
   }
   //拦截URI关键词，这几个关键词是蜜罐特有的。
   //swfobject-2.2.min.js：flash反正没啥用，先干掉，以后再说
-  const mainFrameUrlBlackKeywords = ['func-sns.php', 'immortal_etag.php', 'immortal_cache.php', 'immortal_png.php', 'immortal.js', 'swfobject-2.2.min.js'];
+  const mainFrameUrlBlackKeywords = ['func-sns.php', 'immortal_etag.php', 'immortal_cache.php', 'immortal_png.php', 'immortal.js'];
   if (blockKeywords(url.split('?').slice(0, 1).join(), mainFrameUrlBlackKeywords,
       "main_frame url black keywords", details)) {
     addHoneypotDomain(initiatorDomain);

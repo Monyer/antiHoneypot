@@ -25,20 +25,28 @@ bg.getActiveTabInfo(showBlockInfo);
 
 //放行按钮状态
 bg.getSwitchStatus(status => {
-  var icon = "icon/switch-on.png";
-  if (status == "off") {
-    icon = "icon/switch-off.png";
-  }
-  document.querySelector("#power-switch").src = icon;
+  var color = (status == "off") ? "black" : "red";
+  document.querySelector("#power-switch").style.color = color;
 });
 
 //放行按钮点击事件监听
 document.querySelector("#power-switch").addEventListener("click", function() {
   bg.changeSwitch(status => {
-    var icon = "icon/switch-on.png";
-    if (status == "off") {
-      icon = "icon/switch-off.png";
-    }
-    document.querySelector("#power-switch").src = icon;
+    var color = (status == "off") ? "black" : "red";
+    document.querySelector("#power-switch").style.color = color;
+  });
+});
+
+//清除当前网站的所有浏览器数据
+document.getElementById("clear-data").addEventListener("click", function() {
+  if (!confirm("是否要清除当前网站的所有浏览器数据（包括所有缓存的、存储的）？\n\n" +
+      "注意：整个清除过程大概需要10-30秒，请不管关闭当前弹出窗口直至弹出“清除完成”的警告框！")) {
+    return;
+  }
+  //这是一个很挫，但是很能给人心理安慰的旋转，嘿嘿！
+  document.getElementById("clear-data").classList.add("fa-spin")
+  bg.removeBrowsingData(function() {
+    document.getElementById("clear-data").classList.remove("fa-spin");
+    alert("所有的当前网站浏览器数据（包括所有缓存的、存储的）均已清除。");
   });
 });

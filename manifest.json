@@ -53,7 +53,8 @@
         "webRequest",
         "webRequestBlocking",
         "webNavigation",
-        "notifications"
+        "notifications",
+        "browsingData"
     ],
     "incognito": "spanning",
     "homepage_url": "https://www.monyer.com"

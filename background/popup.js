@@ -69,3 +69,36 @@ function changeSwitch(callback) {
     }
   });
 }
+
+function removeBrowsingData(callback) {
+  getCurrentTab((tab) => {
+    if (tab) {
+      let {
+        domain: domain,
+        topDomain: topDomain
+      } = _getDomain(tab.url);
+      var origins = [
+        "http://" + domain,
+        "https://" + domain,
+        "http://" + topDomain,
+        "https://" + topDomain,
+        tab.url
+      ];
+      chrome.browsingData.remove({
+        "since": 0,
+        "origins": origins
+      }, {
+        "cache": true,
+        "cacheStorage": true,
+        "cookies": true,
+        "fileSystems": true,
+        "indexedDB": true,
+        "localStorage": true,
+        "pluginData": true,
+        "serviceWorkers": true,
+        "webSQL": true
+      }, callback);
+    }
+
+  });
+}

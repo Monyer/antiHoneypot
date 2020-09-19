@@ -1,39 +1,55 @@
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
-    body{
-      width:600px;
-      height:400px;
+    body {
+      width: 600px;
+      height: 400px;
     }
-    .reason{
+
+    .reason {
       color: darkorange;
       display: inline-block;
     }
-    .keyword{
-      color:lightcoral;
+
+    .keyword {
+      color: lightcoral;
       padding: 0 10px;
       display: inline-block;
     }
-    .url{
-      color:darkgrey;
+
+    .url {
+      color: darkgrey;
       margin: 0 20px 0 0;
       word-break: break-all;
       word-wrap: break-word;
     }
+
+    .icon {
+      font-size: 48px;
+      cursor: pointer;
+    }
   </style>
+  <link rel="stylesheet" href="/fontawesome-free-5.14.0-web/css/all.min.css">
 </head>
+
 <body>
   <div>
     <span>
-      <img src="icon/switch-on.png" style="width:64px;cursor: pointer;" id="power-switch">
+      <i class="fas fa-power-off icon" title="放行/拦截本站" style="color:red;" id="power-switch"></i>
       &nbsp;&nbsp;
-      <a href="options.html">配置</a>
+      <i class="fas fa-trash-alt icon" title="清空当前网站浏览器数据" id="clear-data"></i>
+      &nbsp;&nbsp;
+      <a href="options.html" title="插件设置选项">
+        <i class="fas fa-cog icon"></i>
+      </a>
     </span>
   </div>
   <div id="info">Empty.</div>
   <script src="popup.js"></script>
 </body>
+
 </html>

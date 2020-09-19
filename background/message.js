@@ -50,21 +50,22 @@ function onMessageCallback(request, sender, sendResponse) {
     return;
   }
   //check evercookie。比较localStorage、cookies，indexedDB是响应式
-  if (["getStorage", "indexedDB"].includes(request.msgType)) {
-    chrome.cookies.getAll({
-      url: sender.url
-    }, cos => {
-      var co_vals = [];
-      cos.forEach(c => co_vals.push(c.value));
-      ls_vals = Object.values(request.msgData.ls);
-      sameIdCompare(co_vals, ls_vals, urlDomain);
-      if (request.msgType == "indexedDB") {
-        idb_vals = Object.values(request.msgData.idb);
-        console.log(idb_vals, co_vals);
-        sameIdCompare(ls_vals, idb_vals, urlDomain);
-        sameIdCompare(idb_vals, co_vals, urlDomain);
-      }
-    });
+  if (["getStorage", "indexedDB", 'setlocalStorage'].includes(request.msgType)) {
+    setTimeout(function() {
+      chrome.cookies.getAll({
+        url: sender.url
+      }, cos => {
+        var co_vals = [];
+        cos.forEach(c => co_vals.push(c.value));
+        ls_vals = Object.values(request.msgData.ls);
+        sameIdCompare(co_vals, ls_vals, urlDomain);
+        if (request.msgType == "indexedDB") {
+          idb_vals = Object.values(request.msgData.idb);
+          sameIdCompare(ls_vals, idb_vals, urlDomain);
+          sameIdCompare(idb_vals, co_vals, urlDomain);
+        }
+      });
+    }, 1000);
   }
 
   //content-script-start的消息

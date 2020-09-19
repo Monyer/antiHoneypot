@@ -1,3 +1,7 @@
+/**
+ * 该页脚本主要为劫持websql、indexedDB、localStorage
+ * 监听clipboard的获取粘贴值事件。
+ */
 var injectStart = function() {
   //劫持openDataBase
   const openDb = openDatabase;
@@ -22,6 +26,21 @@ var injectStart = function() {
       return oldFunc.apply(this, arguments);
     }
   });
+
+  //劫持localStorage.setItem
+  const lsSetItem = localStorage.__proto__.setItem;
+  localStorage.__proto__.setItem = function(keyName, keyValue) {
+    // console.log(keyValue);
+    window.top.postMessage({
+      msgType: "setlocalStorage",
+      msgData: {
+        ls: {
+          keyValue
+        },
+      }
+    }, '*');
+    return lsSetItem.apply(this, arguments);
+  }
 
   //劫持clipboard的粘贴事件，但是不劫持drop的事件（通过uninitialized，两者都用DataTransfer）
   const dcGetData = DataTransfer.prototype.getData;
