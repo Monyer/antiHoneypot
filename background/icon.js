@@ -21,30 +21,26 @@ function setIconStatus(tabId) {
   var badgeText = "";
   var badgeColor = [255, 255, 255, 255];
   var iconPath = {
-    '48': 'icon/icon48b.png',
-    '128': 'icon/icon128b.png'
+    '48': 'icon/icon48b.png'
   };
   if (GLOBAL.blockTabs[tabId] && GLOBAL.blockTabs[tabId].length !== 0) {
     badgeText = GLOBAL.blockTabs[tabId].length.toString();
     badgeColor = [255, 0, 0, 255];
     iconPath = {
-      '48': 'icon/icon48.png',
-      '128': 'icon/icon128.png'
+      '48': 'icon/icon48.png'
     };
   }
-  if (!GLOBAL.blockTabs[tabId] || GLOBAL.blockTabs[tabId].length <= 1) {
-    tabExists(tabId, function() {
-      chrome.browserAction.setIcon({
-        'path': iconPath,
-        tabId: tabId
-      });
-      chrome.browserAction.setBadgeBackgroundColor({
-        color: badgeColor,
-        tabId: tabId
-      });
-    });
-  }
   tabExists(tabId, function() {
+    if (!GLOBAL.blockTabs[tabId] || GLOBAL.blockTabs[tabId].length <= 1) {
+      chrome.browserAction.setIcon({
+        path: iconPath,
+        tabId: tabId
+      });
+    }
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: badgeColor,
+      tabId: tabId
+    });
     chrome.browserAction.setBadgeText({
       text: badgeText,
       tabId: tabId

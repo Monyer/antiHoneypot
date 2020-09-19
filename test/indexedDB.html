@@ -7,7 +7,8 @@
 </head>
 
 <body>
-  <h3>向indexedDB和cookies中写入：lisi@example.com</h3>
+  <h3>向indexedDB和cookies中写入：</h3>
+  <h5 id="pane1"></h5>
   <script>
     var request = window.indexedDB.open("testdb", 1);
     var db;
@@ -37,16 +38,21 @@
     }
 
     function update() {
-      var request = db.transaction(['person'], 'readwrite')
-        .objectStore('person')
-        .put({
-          id: 1,
-          name: '李四',
-          age: 35,
-          email: 'lisi@example.com'
-        });
+      var sameId = "sameid_" + (+(new Date()));
+      document.cookie = "sameid=" + sameId;
+      document.getElementById("pane1").innerText = sameId;
 
-      document.cookie = "email=lisi@example.com";
+      setTimeout(function() {
+        var request = db.transaction(['person'], 'readwrite')
+          .objectStore('person')
+          .put({
+            id: 1,
+            name: '李四',
+            age: 35,
+            email: sameId
+          });
+      }, 10);
+
 
       request.onsuccess = function(event) {
         console.log('数据更新成功');

@@ -66,7 +66,7 @@ function onMessageCallback(request, sender, sendResponse) {
           sameIdCompare(idb_vals, co_vals, urlDomain);
         }
       });
-    }, 1000);
+    }, 100);
   }
 
   //content-script-start的消息，openDatabase
