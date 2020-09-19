@@ -17,13 +17,18 @@ var injectEnd = function() {
     }
   }
   //如果使用了fingerprint插件，全局函数的内部存在x64hash128和getV18两个对外公开的函数，以此作为判断。
-  var fp = Object.keys(window).filter(func => func != 'webkitStorageInfo' && typeof window[func] == "function" && window[func]['x64hash128'] && window[func]['getV18']);
+  var fpDetect = Object.keys(window).filter(func => func != 'webkitStorageInfo' && typeof window[func] == "function" && window[func]['x64hash128'] && window[func]['getV18']);
 
-  if (fp.length !== 0) {
+  if (fpDetect == 0) {
+    //fingerprintjs pro
+    fpDetect = (typeof window.FP == "object") ? ["FP"] : [];
+  }
+
+  if (fpDetect.length !== 0) {
     window.top.postMessage({
       msgType: "fingerprint2",
       msgData: {
-        fp: fp.join(',')
+        fp: fpDetect.join(',')
       }
     }, '*');
   }
@@ -32,7 +37,7 @@ var injectEnd = function() {
 };
 
 var scriptEnd_1 = document.createElement('script');
-scriptEnd_1.textContent = "(" + injectEnd + ")()";
+scriptEnd_1.textContent = "( window.onload = " + injectEnd + ")()";
 document.documentElement.appendChild(scriptEnd_1);
 
 if (!document.documentElement.dataset.csescriptallow) {
@@ -42,7 +47,7 @@ if (!document.documentElement.dataset.csescriptallow) {
       for (var i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow) {
             iframes[i].contentWindow.uhpInject = ${injectEnd};
-            uhpInject();
+            window.onload = uhpInject;
         }
       }
     }`;
