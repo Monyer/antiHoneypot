@@ -5,6 +5,7 @@ var CONF = {
   indexedDBAlert: true,
   fingerPrintAlert: true,
   getClipboardAlert: true,
+  requestFileSystemAlert: true,
   doNotBlockButRemoveCookie: false
 };
 

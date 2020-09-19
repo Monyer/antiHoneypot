@@ -94,6 +94,19 @@ function onMessageCallback(request, sender, sendResponse) {
     });
   }
 
+  //判断requestFileSystem的函数是否被调用
+  if (request.msgType == "requestFileSystem" && CONF.requestFileSystemAlert) {
+    let msg = "这个网页操作了FileSystem相关函数！[" + request.msgData.funcName + "]";
+    setBlockInfo(sender.tab.id, sender.url, "requestFileSystem hit", msg);
+
+    chrome.notifications.create(null, {
+      type: 'basic',
+      iconUrl: 'icon/icon128.png',
+      title: 'FileSystem操作提醒',
+      message: msg + sender.url
+    });
+  }
+
   //如果前端判断是蜜罐，直接后续阻断所有请求
   if (request.msgType == "honeypotAlert" && !GLOBAL.honeypotDomains.includes(urlDomain)) {
     addHoneypotDomain(urlDomain);

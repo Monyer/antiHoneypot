@@ -27,6 +27,10 @@ var ConfOptions = {
     "label": "是否对获取剪切板行为进行通知",
     "type": "checkbox"
   },
+  requestFileSystemAlert: {
+    "label": "是否对操作FileSystem行为进行通知",
+    "type": "checkbox"
+  },
   doNotBlockButRemoveCookie: {
     "label": "不进行阻断，只移除请求中的Cookie",
     "type": "checkbox"

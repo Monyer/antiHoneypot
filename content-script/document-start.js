@@ -54,7 +54,26 @@ var injectStart = function() {
     return dcGetData.apply(this, arguments);
   };
 
-  //
+  //劫持webkitRequestFileSystem
+  [
+    "requestFileSystem",
+    "webkitRequestFileSystem",
+    "resolveLocalFileSystemURL",
+    "webkitResolveLocalFileSystemURL"
+  ].forEach(func => {
+    if (window[func]) {
+      const oldFunc = window[func];
+      window[func] = function() {
+        window.top.postMessage({
+          msgType: "requestFileSystem",
+          msgData: {
+            funcName: func,
+          }
+        }, '*');
+        return oldFunc.apply(this, arguments);
+      };
+    }
+  });
 
   document.documentElement.dataset.odbscriptallow = true;
 };

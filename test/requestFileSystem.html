@@ -1,0 +1,202 @@
+<html lang="en">
+<!-- Code From: https://github.com/guangying123/FileSystem -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>requestFileSystem test</title>
+</head>
+
+<body>
+  <div id="div1"></div>
+  <script>
+    function appendToDiv(html) {
+      var div = document.createElement("div");
+      div.innerHTML = html;
+      document.getElementById("div1").appendChild(div);
+    }
+
+    window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+    window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
+    var fileSystemObj = {
+      fs: null,
+      size: 52428800,
+      errorHandler: function(e) {
+        switch (e.name) {
+          case 'QuotaExceededError':
+            break;
+          case 'NotFoundError':
+            break;
+          case 'SecurityError':
+            break;
+          case 'InvalidStateError':
+            break;
+          case 'InvalidModificationError':
+            break;
+          default:
+        }
+        console.warn(e.name);
+      },
+      /**
+       * 创建文件
+       * @method
+       * @param {string} file 合法文件名称
+       * @param {string} text 文件内容
+       * @param {string} [mineType] Multipurpose Internet Mail Extensions默认text/plain
+       * @return
+       */
+      createFile: function(file, text, mineType) {
+        fileSystemObj.fs.root.getFile(file, {
+          create: true,
+          exclusive: false
+        }, function(fileEntry) {
+          console.log(fileEntry);
+          //留意它的几个属性{fullPath:"/log.txt",isDirectory: false, isFile : true, name :"log.txt"}
+
+          // 生成FileWriter对象
+          fileEntry.createWriter(function(fileWriter) {
+            //fileWriter.seek(0);默认。意思是从第几行开始写起
+            //fileWriter.seek(fileWriter.length); // Start write position at EOF.
+            fileWriter.onwriteend = function() {
+              if (fileWriter.length == 0) {
+                //可以创建ArrayBuffer、Blob等对象写入文件，但不建议使用BlobBuilder废弃方法
+                fileWriter.write(new Blob([text], {
+                  type: mineType || "text/plain"
+                }));
+              } else {
+                appendToDiv(`${file}写入成功`);
+              }
+            };
+            fileWriter.onerror = function(e) {
+              appendToDiv(`${file}写入失败` + e.toString());
+            };
+            fileWriter.truncate(0); //保留原文档多少行，保留0行就是全部删除原文件内容。truncate也等于一次写入动作，所以需要在onwriteend执行第二次write。
+          }, fileSystemObj.errorHandler);
+        }, fileSystemObj.errorHandler);
+      },
+      /**
+       * 罗列绝对地址下的文件和文件夹
+       * @method
+       * @param {string} absolutePath 绝对地址文件夹
+       * @param {function} [callBack] 回调函数
+       * @return
+       */
+      listAbsolutePath: function(absolutePath, callBack) {
+        resolveLocalFileSystemURL(absolutePath, function(dirEntry) {
+          var dirReader = dirEntry.createReader();
+          dirReader.readEntries(function(results) {
+            callBack.call(dirReader, results);
+          }, fileSystemObj.errorHandler);
+        }, function(e) {
+          callBack.call(e, []);
+        })
+      },
+      /**
+       * 罗列相对地址下的文件和文件夹
+       * @method
+       * @param {string} relativePath 绝对地址文件夹
+       * @param {function} [callBack] 回调函数
+       * @return
+       */
+      listRelativePath: function(relativePath, callBack) {
+        fileSystemObj.fs.root.getDirectory(relativePath, {}, function(dirEntry) {
+          var dirReader = dirEntry.createReader();
+          dirReader.readEntries(function(results) {
+            callBack.call(dirReader, results);
+          }, fileSystemObj.errorHandler);
+        }, function(e) {
+          callBack.call(e, []);
+        })
+      },
+      /**
+       * 读取根目录下的文件
+       * @method
+       * @param {string} file 合法文件名称
+       * @param {function} [callBack] 回调函数
+       * @return
+       */
+      readerFile: function(file, callBack) {
+        fileSystemObj.fs.root.getFile(file, {
+          create: true
+        }, function(fileEntry) {
+          fileEntry.file(function(file) {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+              typeof callBack == 'function' && callBack.call(fileEntry, this.result);
+            };
+            reader.readAsText(file);
+          }, fileSystemObj.errorHandler);
+        }, fileSystemObj.errorHandler);
+      },
+      initialize: function() {
+        //写入test.html
+        let html = `userUniqueId:40e7af8f88efb3274817a10d2ce8503b32530eee`;
+        appendToDiv("<h3>生成唯一ID</h3>")
+        appendToDiv("<h5>" + html + "</h5>");
+
+        setTimeout(function() {
+          window.requestFileSystem(TEMPORARY, this.size, function(fs) {
+            appendToDiv("<h3>将userUniqueId.txt写入FileSystem（webkitRequestFileSystem）</h3>");
+            fileSystemObj.fs = fs;
+            fileSystemObj.createFile("userUniqueId.txt", html);
+          })
+        }, 1000);
+        //列文件
+        setTimeout(function() {
+          window.requestFileSystem(TEMPORARY, this.size, function(fs) {
+            appendToDiv("<h3>从FileSystem读取文件列表</h3>");
+            fileSystemObj.fs = fs;
+            var url = "filesystem:" + location.origin + "/temporary";
+            fileSystemObj.listAbsolutePath(url, function(arr) {
+              if (this.message) {
+                appendToDiv(this.message);
+                console.error(this.name);
+              } else {
+                var html = '<ol>';
+                for (var i = arr.length; i--;) {
+                  let file = arr[i];
+                  if (file.isFile) {
+                    html += `<li>File:<a href="${file.toURL()}" target="_blank">${file.name}</a> fullPath:${file.fullPath}</li>`;
+                  } else {
+                    html += `<li>Folder:${arr[i].name} fullPath:${arr[i].fullPath}</li>`;
+                  }
+                }
+                html += '</ol>';
+                appendToDiv(html);
+              }
+            });
+          })
+        }, 2000);
+
+        setTimeout(function() {
+          window.requestFileSystem(TEMPORARY, this.size, function(fs) {
+            appendToDiv("<h3>从FileSystem读取userUniqueId.txt</h3>");
+            fileSystemObj.fs = fs;
+            fileSystemObj.readerFile("userUniqueId.txt", function(text) {
+              var txtArea = document.createElement('h5');
+              txtArea.innerText = text;
+              txtArea.cols = 50;
+              txtArea.rows = 10;
+              document.body.appendChild(txtArea);
+            });
+          })
+        }, 3000);
+      }
+    };
+    if (window.requestFileSystem) {
+      navigator.webkitTemporaryStorage.queryUsageAndQuota(function(usage, quota) {
+        if (!quota) {
+          navigator.webkitTemporaryStorage.requestQuota(fileSystemObj.size, function(grantedBytes) {
+            fileSystemObj.initialize();
+          }, fileSystemObj.errorHandler);
+        } else {
+          fileSystemObj.initialize();
+        }
+      });
+    } else {
+      alert("请使用chrome浏览器浏览!");
+    }
+  </script>
+</body>
+
+</html>
