@@ -47,7 +47,7 @@ if (!document.documentElement.dataset.csescriptallow) {
       for (var i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow) {
             iframes[i].contentWindow.uhpInject = ${injectEnd};
-            document.addEventListener('load', uhpInject);
+            uhpInject();
         }
       }
     }`;
