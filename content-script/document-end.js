@@ -21,7 +21,7 @@ var injectEnd = function() {
 
   if (fpDetect == 0) {
     //fingerprintjs pro
-    fpDetect = (typeof window.FP == "object") ? ["FP"] : [];
+    fpDetect = (typeof window.FP == "object" || typeof window.fpLayer !== "undefined") ? ["fpPro"] : [];
   }
 
   if (fpDetect.length !== 0) {
@@ -37,7 +37,7 @@ var injectEnd = function() {
 };
 
 var scriptEnd_1 = document.createElement('script');
-scriptEnd_1.textContent = "( window.onload = " + injectEnd + ")()";
+scriptEnd_1.textContent = "document.addEventListener('load'," + injectEnd + ");";
 document.documentElement.appendChild(scriptEnd_1);
 
 if (!document.documentElement.dataset.csescriptallow) {
@@ -47,7 +47,7 @@ if (!document.documentElement.dataset.csescriptallow) {
       for (var i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow) {
             iframes[i].contentWindow.uhpInject = ${injectEnd};
-            window.onload = uhpInject;
+            document.addEventListener('load', uhpInject);
         }
       }
     }`;

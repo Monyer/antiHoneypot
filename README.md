@@ -24,3 +24,8 @@
 * 打开[chrome扩展程序页](chrome://extensions/)
 * 切换到开发者模式
 * 使用“加载已解压的扩展程序”加载扩展即可
+
+## 信息共享
+* 大家如果有Bug反馈、新功能建议，请直接发到issue。
+* 如果遇到新的蜜罐，请打开新的chrome的无痕模式，然后打开“开发者工具”，切换到“Network”标签，选中“disable cache”，然后请求或刷新页面。待页面完全加载完成后，右键选择“Save all as HAR with content”生成HAR文件发到issue即可（如果比较大，压缩成zip上传）。
+* 如果遇到页面包含反调试功能，切换到“开发者工具”的“Source”标签，点击右上的“Deactivate breakpoints”按钮，再点击“Resume script execution”按钮即可。注：有些反调试功能会通过死循环耗尽浏览器资源，所以如果发现页面卡了，抓完包关闭当前标签即可
