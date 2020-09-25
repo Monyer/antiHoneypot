@@ -4,7 +4,11 @@
  */
 var injectEnd = function() {
   window.addEventListener("load", function() {
-    //某蜜罐用了两个全局变量：token、path。token为使用短横线链接的随机值，path为js_开头的目录
+    /**
+     * 默安蜜罐
+     * 
+     * 某蜜罐用了两个全局变量： token、 path。 token为使用短横线链接的随机值， path为js_开头的目录
+     */
     if (window.token !== undefined && window.path !== undefined) {
       if (typeof token == "string" && token.includes("-") &&
         typeof path == "string" && path.includes("js_")) {
@@ -17,7 +21,11 @@ var injectEnd = function() {
         }, '*');
       }
     }
-    //如果使用了fingerprint插件，全局函数的内部存在x64hash128和getV18两个对外公开的函数，以此作为判断。
+    /**
+     * 识别fingerprint插件
+     * 
+     * 如果使用了fingerprint插件， 全局函数的内部存在x64hash128和getV18两个对外公开的函数， 以此作为判断。
+     */
     var fpDetect = Object.keys(window).filter(func => func != 'webkitStorageInfo' && typeof window[func] == "function" && window[func]['x64hash128'] && window[func]['getV18']);
 
     if (fpDetect == 0) {
@@ -50,11 +58,25 @@ var injectEnd = function() {
         /function\((_0x[0-9a-f]{6}),_0x[0-9a-f]{6}\){\1=\1/.test(window[key].toString().replaceAll(/[\r\n\s\t]*/g, ""))));
 
     if (isObfuscator.length >= 2) {
-      console.log(isObfuscator);
+      //   console.log(isObfuscator);
       let msgData = isObfuscator.map(key => [key, window[key].toString()]);
       window.top.postMessage({
         msgType: "isObfuscator",
         msgData: msgData
+      }, '*');
+    }
+
+    /**
+     * 识别BEEF
+     */
+    if (typeof BeefJS == "object" ||
+      typeof beef == "object" ||
+      typeof beef_init == "function" ||
+      typeof _evercookie_flash_var == "function" ||
+      window.name.includes("BEEFHOOK=")) {
+      window.top.postMessage({
+        msgType: "beefAlert",
+        msgData: ""
       }, '*');
     }
 

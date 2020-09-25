@@ -92,8 +92,8 @@ function onMessageCallback(request, sender, sendResponse) {
 
   //判断fingerPrintJs是否存在，准确率应该挺高
   if (request.msgType == "fingerprint2") {
-    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
     GLOBAL.fingerPrints[sender.tab.id] = true;
+    setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
     sendNotifaction('这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url);
   }
 
@@ -120,6 +120,13 @@ function onMessageCallback(request, sender, sendResponse) {
   //判断是否有Obfuscator混淆过的脚本
   if (request.msgType == "isObfuscator" && CONF.obfuscatorAlert) {
     let msg = "这个页面中有脚本使用了Obfuscator做了混淆！";
+    setBlockInfo(sender.tab.id, sender.url, "Obfuscator hit", msg);
+    sendNotifaction(msg + sender.url);
+  }
+
+  //判断是否是Beef
+  if (request.msgType == "beefAlert") {
+    let msg = "这个页面中含有BEEF跟踪脚本";
     setBlockInfo(sender.tab.id, sender.url, "Obfuscator hit", msg);
     sendNotifaction(msg + sender.url);
   }
