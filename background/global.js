@@ -4,6 +4,7 @@ var GLOBAL = {
   blockTabs: {}, //临时存储被阻断的链接信息
   honeypotDomains: [], //用于存储确定是蜜罐的域名
   exceptDomains: [], //用于存储白名单域名
+  needCheckRequest: {}, //用于临时存储需要再次请求的RequestBody
 };
 
 //从storage中读取并写入全局变量honeypotDomains

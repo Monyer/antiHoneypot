@@ -33,3 +33,56 @@ function _getDomain(url) {
   ret.topDomain = matchTopDomain[0];
   return ret;
 }
+
+/**
+ * 向浏览器发送通知
+ * @param {*} msg 
+ */
+function sendNotifaction(msg) {
+  chrome.notifications.create(null, {
+    type: 'basic',
+    iconUrl: 'icon/icon128.png',
+    title: 'AntiHoneypot提醒',
+    message: msg
+  });
+}
+
+/**
+ * 设置block信息到全局变量，并改变icon状态
+ * @param {number} tabId 
+ * @param {string} blockUrl 
+ * @param {string} blockReason 
+ * @param {string} blockInfo 
+ */
+function setBlockInfo(tabId, blockUrl, blockReason, blockInfo) {
+  if (!GLOBAL.blockTabs[tabId]) {
+    GLOBAL.blockTabs[tabId] = [];
+  }
+  GLOBAL.blockTabs[tabId].push({
+    "blockUrl": blockUrl,
+    "blockReason": blockReason,
+    "blockInfo": blockInfo
+  });
+  getCurrentTab((tab) => {
+    if (tab && tab.id == tabId) {
+      setIconStatus(tabId);
+    }
+  });
+}
+
+/**
+ * 判断content字符串中是否含有keywords中的关键词，返回true并添加拦截信息
+ * @param {string} content 
+ * @param {string[]} keywords 
+ * @param {string} summary 
+ * @param {object} details 
+ */
+function blockKeywords(content, keywords, summary, details) {
+  let includesKeywords = (content, keywords) => keywords.filter(keyword => content.toLowerCase().includes(keyword));
+  let blockInfo = includesKeywords(content, keywords);
+  if (blockInfo.length !== 0) {
+    setBlockInfo(details.tabId, details.url, summary, blockInfo.join(','));
+    return true;
+  }
+  return false;
+}

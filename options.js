@@ -7,6 +7,10 @@ var ConfOptions = {
     "min": 1,
     "max": 256
   },
+  blockHoneypotDomain: {
+    "label": "对识别出的蜜罐进行拦截",
+    "type": "checkbox"
+  },
   sameIdAlert: {
     "label": "是否对跟踪标识进行通知",
     "type": "checkbox"
@@ -31,10 +35,14 @@ var ConfOptions = {
     "label": "是否对操作FileSystem行为进行通知",
     "type": "checkbox"
   },
-  doNotBlockButRemoveCookie: {
-    "label": "不进行阻断，只移除请求中的Cookie",
+  obfuscatorAlert: {
+    "label": "是否对obfuscator加密进行通知",
     "type": "checkbox"
   },
+  //   doNotBlockButRemoveCookie: {
+  //     "label": "不进行XSSI阻断，只移除请求中的Cookie",
+  //     "type": "checkbox"
+  //   },
 };
 
 Object.keys(bg.CONF).forEach(key => {

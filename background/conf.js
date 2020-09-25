@@ -1,18 +1,21 @@
 var CONF = {
   sameIdMinLength: 16,
+  blockHoneypotDomain: true,
   sameIdAlert: true,
   openDatabaseAlert: true,
   indexedDBAlert: true,
   fingerPrintAlert: true,
   getClipboardAlert: true,
   requestFileSystemAlert: true,
-  doNotBlockButRemoveCookie: false
+  obfuscatorAlert: true,
+  //   doNotBlockButRemoveCookie: false
 };
 
 //从storage中拉取配置，覆盖CONF
 chrome.storage.local.get({
   CONF: CONF
 }, function(items) {
-  CONF = items.CONF;
-  //   console.log(CONF);
+  if (Object.keys(items.CONF) == Object.keys(CONF)) {
+    CONF = items.CONF;
+  }
 });

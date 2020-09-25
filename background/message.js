@@ -17,13 +17,7 @@ function sameIdCompare(sVals, tVals, domain) {
     if (!GLOBAL.sameIds[ids[i]].includes(domain)) {
       GLOBAL.sameIds[ids[i]].push(domain);
       if (CONF.sameIdAlert) {
-        chrome.notifications.create(null, {
-          type: 'basic',
-          iconUrl: 'icon/icon128.png',
-          title: 'AntiHoneypot提醒',
-          message: '这个网站设置了跟踪标识：' +
-            domain + "[" + ids[i] + "]"
-        });
+        sendNotifaction("这个网站设置了跟踪标识：" + domain + "[" + ids[i] + "]");
       }
     }
   }
@@ -73,38 +67,21 @@ function onMessageCallback(request, sender, sendResponse) {
   if (request.msgType == "openDatabase" && CONF.openDatabaseAlert) {
     let msg = "这个网页调用了openDatabase！";
     setBlockInfo(sender.tab.id, sender.url, "openDatabase hit", msg);
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: 'AntiHoneypot提醒',
-      message: msg + sender.url
-    });
+    sendNotifaction(msg + sender.url);
   }
 
   //getClipboard
   if (request.msgType == "getClipboard" && CONF.getClipboardAlert) {
-    let msg = "这个网页调用了剪切板粘贴取值函数！";
+    let msg = "剪切板粘贴取值提醒：这个网页调用了剪切板粘贴取值函数！";
     setBlockInfo(sender.tab.id, sender.url, "getClipboard hit", msg);
-
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: '剪切板粘贴取值提醒',
-      message: msg + sender.url
-    });
+    sendNotifaction(msg + sender.url);
   }
 
   //判断requestFileSystem的函数是否被调用
   if (request.msgType == "requestFileSystem" && CONF.requestFileSystemAlert) {
-    let msg = "这个网页操作了FileSystem相关函数！[" + request.msgData.funcName + "]";
+    let msg = "FileSystem操作提醒：这个网页操作了FileSystem相关函数！[" + request.msgData.funcName + "]";
     setBlockInfo(sender.tab.id, sender.url, "requestFileSystem hit", msg);
-
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: 'FileSystem操作提醒',
-      message: msg + sender.url
-    });
+    sendNotifaction(msg + sender.url);
   }
 
   //如果前端判断是蜜罐，直接后续阻断所有请求
@@ -117,13 +94,7 @@ function onMessageCallback(request, sender, sendResponse) {
   if (request.msgType == "fingerprint2") {
     setBlockInfo(sender.tab.id, sender.url, "fingerPrintJs hit", request.msgData.fp);
     GLOBAL.fingerPrints[sender.tab.id] = true;
-
-    chrome.notifications.create(null, {
-      type: 'basic',
-      iconUrl: 'icon/icon128.png',
-      title: 'AntiHoneypot提醒',
-      message: '这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url
-    });
+    sendNotifaction('这个网页有FingerPrint2指纹识别程序，请小心！' + sender.url);
   }
 
   //判断是否被获取指纹，准确度不高，误报挺严重。发现不少网站会调用font、canvas、audio、webgl的相关函数
@@ -140,16 +111,19 @@ function onMessageCallback(request, sender, sendResponse) {
         Object.keys(GLOBAL.fingerPrints[sender.tab.id]));
 
       if (CONF.fingerPrintAlert) {
-        chrome.notifications.create(null, {
-          type: 'basic',
-          iconUrl: 'icon/icon128.png',
-          title: 'AntiHoneypot提醒',
-          message: '这个网页有指纹识别功能，请小心！' + sender.url
-        });
+        sendNotifaction('这个网页有指纹识别功能，请小心！' + sender.url);
       }
 
     }
   }
+
+  //判断是否有Obfuscator混淆过的脚本
+  if (request.msgType == "isObfuscator" && CONF.obfuscatorAlert) {
+    let msg = "这个页面中有脚本使用了Obfuscator做了混淆！";
+    setBlockInfo(sender.tab.id, sender.url, "Obfuscator hit", msg);
+    sendNotifaction(msg + sender.url);
+  }
+
   sendResponse(true);
 }
 

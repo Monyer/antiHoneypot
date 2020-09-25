@@ -1,39 +1,10 @@
 /**
- * 设置block信息到全局变量，并改变icon状态
- * @param {number} tabId 
- * @param {string} blockUrl 
- * @param {string} blockReason 
- * @param {string} blockInfo 
- */
-function setBlockInfo(tabId, blockUrl, blockReason, blockInfo) {
-  if (!GLOBAL.blockTabs[tabId]) {
-    GLOBAL.blockTabs[tabId] = [];
-  }
-  GLOBAL.blockTabs[tabId].push({
-    "blockUrl": blockUrl,
-    "blockReason": blockReason,
-    "blockInfo": blockInfo
-  });
-  getCurrentTab((tab) => {
-    if (tab && tab.id == tabId) {
-      setIconStatus(tabId);
-    }
-  });
-}
-
-/**
  * 放行安全的请求
  * @param {object} details 
  */
 function _greenLight(details) {
-  //不拦截对扩展的请求
-  if (details.url.includes("chrome-extension://")) {
-    return true;
-  }
-  //所有类型："main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", or "other"
-  //有风险的类型：sub_frame、script
   //不拦截的请求类型
-  if (['main_frame', 'stylesheet', 'image', 'font', 'media'].includes(details.type)) {
+  if (KEYWORDLIST.whiteType.includes(details.type)) {
     return true;
   }
   //没有发起人情况，暂时先放行，视情况而定
@@ -41,12 +12,10 @@ function _greenLight(details) {
     console.log("initiator undefined", details);
     return true;
   }
-
   //获取发起人和请求的URL的域名和顶级域名
   let {
     topDomain: initiatorTopDomain
   } = _getDomain(details.initiator);
-
   let {
     topDomain: urlTopDomain,
     domain: urlDomain
@@ -55,60 +24,82 @@ function _greenLight(details) {
   if (initiatorTopDomain == urlTopDomain) {
     return true;
   }
-  let whiteDomains = ['translate.googleapis.com', 'gblobscdn.gitbook.com'];
-  if (whiteDomains.includes(urlDomain)) {
+  if (KEYWORDLIST.whiteXssiDomains.includes(urlDomain)) {
     return true;
   }
-
 }
 
 /**
- * 判断content字符串中是否含有keywords中的关键词，返回true并添加拦截信息
- * @param {string} content 
- * @param {string[]} keywords 
- * @param {string} summary 
- * @param {object} details 
+ * 通过二次发送请求
+ * @param {*} details 
  */
-function blockKeywords(content, keywords, summary, details) {
-  let includesKeywords = (content, keywords) => keywords.filter(keyword => content.toLowerCase().includes(keyword));
-  let blockInfo = includesKeywords(content, keywords);
-  if (blockInfo.length !== 0) {
-    setBlockInfo(details.tabId, details.url, summary, blockInfo.join(','));
+function _checkInHttpBody(details, needCheckRequest) {
+  //   console.log(details);
+  //   console.log(needCheckRequest);
+  var addition = {};
+  //method
+  if (details.method !== undefined) {
+    addition.method = details.method;
+  }
+  //post data
+  if (needCheckRequest.requestBody) {
+    let formData = needCheckRequest.requestBody.formData;
+    let body = "";
+    Object.keys(formData).forEach(key => {
+      formData[key].forEach(vals => {
+        body += encodeURIComponent(key) + "=" + encodeURIComponent(vals) + "&";
+      });
+    });
+    addition.body = body;
+  }
+  //refer
+  //   let getHeader = headerKey => details.requestHeaders.filter(header => header.name == headerKey);
+  //   let referer = getHeader("Referer") ? getHeader("Referer")[0].value : details.initiator;
+  //   //   addition.referrer = referer;
+  //   addition.referrerPolicy = "origin";
+
+  //headers
+  if (details.requestHeaders) {
+    let headers = {};
+    details.requestHeaders.forEach(header => headers[header.name] = header.value);
+    addition.headers = headers
+  }
+  //   console.log(addition);
+  fetch(details.url, addition).then(data => data.text()).then(body => {
+    // console.log(body);
+    let isBlack = needCheckRequest.blackKeywords.filter(keyword => body.includes(keyword));
+    if (isBlack.sort().toString() === needCheckRequest.blackKeywords.sort().toString()) {
+      //获取请求的网站域名
+      let {
+        domain: urlDomain
+      } = _getDomain(details.url.toLowerCase());
+      sendNotifaction("此站被识别为[" + needCheckRequest.honeypotName + "]蜜罐，将予以屏蔽。[" + urlDomain + "]");
+      setBlockInfo(details.tabId, details.url, "识别为蜜罐[" + needCheckRequest.honeypotName + "]", needCheckRequest.blackKeywords);
+      addHoneypotDomain(urlDomain);
+    }
+  }).catch(e => {});
+
+}
+
+function _checkIfHoneypot(details) {
+  var url = details.url.toLowerCase();
+  //拦截URI关键词，这几个关键词是蜜罐特有的。
+  if (blockKeywords(url.split('?').slice(0, 1).join(), KEYWORDLIST.honeypotUri,
+      "main_frame url black keywords", details)) {
     return true;
   }
+
+  //蜜罐特征深度检测，获取postbody等待二次请求，
+  KEYWORDLIST.honeypotTraits.forEach(suspect => {
+    if (details.url.includes(suspect.urlKeyword)) {
+      GLOBAL.needCheckRequest[details.requestId] = {
+        requestBody: details.requestBody || false,
+        blackKeywords: suspect.blackKeywords,
+        honeypotName: suspect.honeypotName,
+      };
+    }
+  });
   return false;
-}
-
-/**
- * 移除requestHeaders中的Cookie字段
- * @param {*} details 
- */
-function _removeCookie(details) {
-  for (var i = 0; i < details.requestHeaders.length; ++i) {
-    if (details.requestHeaders[i].name.toLowerCase() === 'cookie') {
-      details.requestHeaders.splice(i, 1);
-      break;
-    }
-  }
-  return {
-    requestHeaders: details.requestHeaders
-  };
-}
-
-/**
- * 移除responseHeaders中的set-cookie
- * @param {*} details 
- */
-function _removeSetCookie(details) {
-  for (var i = 0; i < details.responseHeaders.length; ++i) {
-    if (details.responseHeaders[i].name.toLowerCase() === 'set-cookie') {
-      details.responseHeaders.splice(i, 1);
-      break;
-    }
-  }
-  return {
-    responseHeaders: details.responseHeaders
-  };
 }
 
 /**
@@ -118,33 +109,26 @@ function _removeSetCookie(details) {
 function _checkIfUrlBlack(details) {
   var url = details.url.toLowerCase();
   let {
-    domain: urlDomain
+    domain: urlDomain,
   } = _getDomain(url);
-  //TODO:可以增加一个规则，如果没有Cookie字段则放行。
-  //   console.log(details);
+  //TODO:可以尝试增加一个规则，如果没有Cookie字段则放行。
 
   //ban掉URL中所有打中关键词。
-  if (['script', 'xmlhttprequest', 'sub_frame'].includes(details.type)) {
-
+  if (KEYWORDLIST.xssiType.includes(details.type)) {
     //ban掉蜜罐中出现过的jsonp域名
-    let blackJsonpDomain = ['comment.api.163.com', 'now.qq.com', 'node.video.qq.com', 'passport.game.renren.com', 'wap.sogou.com', 'v2.sohu.com', 'login.sina.com.cn', 'm.iask.sina.com.cn', 'bbs.zhibo8.cc', 'appscan.360.cn', 'wz.cnblogs.com', 'api.csdn.net', 'so.v.ifeng.com', 'api-live.iqiyi.com', 'account.itpub.net', 'm.mi.com', 'hudong.vip.youku.com', 'home.51cto.com', 'passport.baidu.com', 'baike.baidu.com', 'zhifu.duxiaoman.com', 'zhifu.baidu.com', 'chinaunix.net', 'www.cndns.com', 'remind.hupu.com', 'api.m.jd.com', 'passport.tianya.cn', 'my.zol.com.cn', 'account.cnblogs.com', 'pcw-api.iqiyi.com', 'stadig.ifeng.com', 'account.xiaomi.com', 'cmstool.youku.com', 'api.ip.sb', 'log.mmstat.com', 's1.mi.com', 'fourier.taobao.com', 'cndns.com', 'sitestar.cn', 'tie.163.com', 'musicapi.taihe.com', 'databack.dangdang.com', 'accounts.ctrip.com', 'api.fpjs.io', 'api.sjpf.io', 'eu.api.fpjs.io'];
-    if (blockKeywords(urlDomain, blackJsonpDomain, "black jsonp domain", details)) {
+    if (blockKeywords(urlDomain, KEYWORDLIST.blackXssiDomain, "jsonp域名黑名单", details)) {
       return true;
     }
     //ban掉其他危险的域名，譬如统计网站。对于防追踪，用一些adblock插件会更全一些，效果更哈奥
-    let blackOtherDomain = ['hm.baidu.com', 'cnzz.com', '51.la', 'google-analytics.com', 'googletagservices.com'];
-    if (blockKeywords(urlDomain, blackOtherDomain, "danger domain", details)) {
+    if (blockKeywords(urlDomain, KEYWORDLIST.blackOtherXssiDomain, "其他域名", details)) {
       return true;
     }
-
-    let blackUriKeywords = ['.json', 'jsonp'];
-    if ("误杀比较严重，先屏蔽" === false &&
-      blockKeywords(url.split("?").slice(0, 1).join('?'), blackUriKeywords, "black url keyword", details)) {
+    //ban掉URI部分中的关键词。
+    if (blockKeywords(url.split("?").slice(0, 1).join('?'), KEYWORDLIST.blackXssiUriKeywords, "URI关键字黑名单", details)) {
       return true;
     }
-
-    let blackQueryKeyWords = ["callback", "jsonp", "token=", "=json", "json=", "=jquery", "js_token", "window.name", "eval("];
-    if (blockKeywords(url.split("?").slice(1).join('?'), blackQueryKeyWords, "black query keyword", details)) {
+    //ban掉Query部分中的关键词
+    if (blockKeywords(url.split("?").slice(1).join('?'), KEYWORDLIST.blackXssiQueryKeyWords, "Query关键字黑名单", details)) {
       return true;
     }
   }
@@ -152,13 +136,17 @@ function _checkIfUrlBlack(details) {
 }
 
 /**
- * 按照domain、uri和querystring进行拦截
- * @param {object} details 
- * @todo 一种思路：可以parse query string，获取所有value，然后去tab页面判断value===undefined是否成立
+ * 在请求发起前
+ * @param {*} details 
  */
-function beforeSendHeaders(details) {
+function beforeRequest(details) {
+  //不拦截对扩展的请求
+  if ((details.url && details.url.includes("chrome-extension://")) ||
+    (details.initiator && details.initiator.includes("chrome-extension://"))
+  ) {
+    return;
+  }
   var url = details.url.toLowerCase();
-  //   console.log(details);
   const cancel = {
     cancel: true
   };
@@ -174,113 +162,70 @@ function beforeSendHeaders(details) {
   if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
     return;
   }
-  //如果域名是honeypot的域名（通过content-script传递过来的），则所有相关请求全部阻断掉
+
+  //如果域名是honeypot的域名，则所有相关请求全部阻断掉
   if (GLOBAL.honeypotDomains.includes(urlDomain) ||
     GLOBAL.honeypotDomains.includes(initiatorDomain)) {
-    setBlockInfo(details.tabId, url, "honeypot block all", [initiatorDomain, urlDomain]);
-    return cancel;
+    setBlockInfo(details.tabId, url, "识别蜜罐", [initiatorDomain, urlDomain]);
+    if (CONF.blockHoneypotDomain) {
+      //提示并拦截
+      sendNotifaction("请注意，本域名已被识别为蜜罐，将会拦截所有请求：[发起者：" +
+        initiatorDomain + ", 请求域名：" + urlDomain);
+      return cancel;
+    } else {
+      //只提示不拦截
+      return;
+    }
   }
-  //拦截URI关键词，这几个关键词是蜜罐特有的。
-  //swfobject-2.2.min.js：flash反正没啥用，先干掉，以后再说
-  const mainFrameUrlBlackKeywords = ['func-sns.php', 'immortal_etag.php', 'immortal_cache.php', 'immortal_png.php', 'immortal.js'];
-  if (blockKeywords(url.split('?').slice(0, 1).join(), mainFrameUrlBlackKeywords,
-      "main_frame url black keywords", details)) {
+
+  //检测是不是蜜罐，通过URL关键词，以及二次请求body中的内容关键词，需要放在_greenLight之前
+  if (_checkIfHoneypot(details)) {
+    addHoneypotDomain(urlDomain);
     addHoneypotDomain(initiatorDomain);
     return cancel;
   }
+
   //放行无危险的请求类型，放行与发起人同网站的请求
   if (_greenLight(details) === true) {
     return;
   }
-  //ban掉URL中所有打中关键词。
+
+  //主要通过URL的关键词来检测是否是XSSI。
   if (_checkIfUrlBlack(details)) {
-    if (CONF.doNotBlockButRemoveCookie) {
-      return _removeCookie(details);
-    } else {
-      return cancel;
-    }
+    return cancel;
   }
 
 }
 
 /**
- * 在收到服务器端header后，按照header头信息进行拦截
+ * 按照domain、uri和querystring进行拦截
  * @param {object} details 
+ * @todo 一种思路：可以parse query string，获取所有value，然后去tab页面判断value===undefined是否成立
  */
-function headersReceived(details) {
-  //   return;
-  const cancel = {
-    cancel: true
-  };
-  let {
-    domain: initiatorDomain
-  } = _getDomain(details.initiator);
-
-  //如果是排除的域名，则放行
-  if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
-    return;
-  }
-
-  let getHeader = headerKey => details.responseHeaders.filter(header => header.name.toLowerCase() == headerKey);
-  //某蜜罐服务器的Server字段特征
-  let headerServerBlackKeywords = ['*****'];
-  let headerServer = getHeader('server');
-  if (headerServer.length !== 0 &&
-    blockKeywords(headerServer[0].value, headerServerBlackKeywords, "black header[server]", details)
+function beforeSendHeaders(details) {
+  //不拦截对扩展的请求
+  if ((details.url && details.url.includes("chrome-extension://")) ||
+    (details.initiator && details.initiator.includes("chrome-extension://"))
   ) {
-    return cancel;
-  }
-  //根据请求类型、发起人情况放行
-  if (_greenLight(details) === true) {
     return;
   }
-
-  //ban掉URL中所有打中关键词。
-  if (_checkIfUrlBlack(details)) {
-    if (CONF.doNotBlockButRemoveCookie) {
-      return _removeSetCookie(details);
-    } else {
-      return cancel;
-    }
+  //检测是不是蜜罐，通过二次请求body中的内容关键词
+  if (GLOBAL.needCheckRequest[details.requestId]) {
+    //异步请求
+    _checkInHttpBody(details, GLOBAL.needCheckRequest[details.requestId]);
   }
-
-  //如果顶级域名不一致，又是以script方式加载，type为json的那么是jsonp，type为text/html的那么是动态生成的js。
-  if ("误杀太严重，暂时屏蔽" === 0 && ['script', 'xmlhttprequest'].includes(details.type)) {
-    let poweredBy = getHeader('x-powered-by');
-    if (poweredBy.length !== 0) {
-      setBlockInfo(details.tabId, details.url, "black header[x-powered-by]", "x-powered-by");
-      if (CONF.doNotBlockButRemoveCookie) {
-        return _removeSetCookie(details);
-      } else {
-        return cancel;
-      }
-    }
-
-    let contentType = getHeader('content-type');
-    let contentTypeBlackKeywords = ['json', 'text/html'];
-    if (contentType.length !== 0 &&
-      blockKeywords(contentType[0].value, contentTypeBlackKeywords, "black header[content-type]", details)
-    ) {
-      if (CONF.doNotBlockButRemoveCookie) {
-        return _removeSetCookie(details);
-      } else {
-        return cancel;
-      }
-    }
-  }
-
 }
+
+//设置监听器于Header发送开始前，主要用于缓存requestBody
+chrome.webRequest.onBeforeRequest.addListener(
+  beforeRequest, {
+    urls: ["<all_urls>"]
+  }, ['blocking', 'extraHeaders', 'requestBody']
+);
 
 //设置监听器于Header发送开始前
 chrome.webRequest.onBeforeSendHeaders.addListener(
   beforeSendHeaders, {
     urls: ["<all_urls>"]
   }, ['blocking', 'extraHeaders', 'requestHeaders']
-);
-
-//设置监听器于服务器端header发送后，body发送之前
-chrome.webRequest.onHeadersReceived.addListener(
-  headersReceived, {
-    urls: ['<all_urls>']
-  }, ['blocking', 'extraHeaders', 'responseHeaders']
 );

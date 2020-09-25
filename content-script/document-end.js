@@ -33,6 +33,31 @@ var injectEnd = function() {
         }
       }, '*');
     }
+
+    /**
+     * 判断Obfuscator混淆
+     * 
+     * 枚举window下对象， 匹配_0x1a2b这种6位的， 并判断数据类型。
+     * 如果其中一个为Array类型， 另一个为Function类型
+     * 且Function类型匹配function(_0x41f28b, _0x2ef1ab) {
+         _0x41f28b = _0x41f28b这种格式
+       则应该是 Obfuscator 做的混淆， 有可能是不可告人的脚本
+     */
+    var isObfuscator = Object.keys(window)
+      .filter(key => /_0x[0-9a-f]{4}/.test(key))
+      .filter(key => (window[key] instanceof Array) || (
+        (window[key] instanceof Function) &&
+        /function\((_0x[0-9a-f]{6}),_0x[0-9a-f]{6}\){\1=\1/.test(window[key].toString().replaceAll(/[\r\n\s\t]*/g, ""))));
+
+    if (isObfuscator.length >= 2) {
+      console.log(isObfuscator);
+      let msgData = isObfuscator.map(key => [key, window[key].toString()]);
+      window.top.postMessage({
+        msgType: "isObfuscator",
+        msgData: msgData
+      }, '*');
+    }
+
   });
   document.documentElement.dataset.csescriptallow = true;
 };
