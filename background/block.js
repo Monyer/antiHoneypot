@@ -120,7 +120,7 @@ function _checkIfUrlBlack(details) {
       return true;
     }
     //ban掉其他危险的域名，譬如统计网站。对于防追踪，用一些adblock插件会更全一些，效果更哈奥
-    if (blockKeywords(urlDomain, KEYWORDLIST.blackOtherXssiDomain, "其他域名", details)) {
+    if (blockKeywords(urlDomain, KEYWORDLIST.blackOtherXssiDomain, "其他域名黑名单", details)) {
       return true;
     }
     //ban掉URI部分中的关键词。
