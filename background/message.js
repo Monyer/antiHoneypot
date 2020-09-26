@@ -131,6 +131,12 @@ function onMessageCallback(request, sender, sendResponse) {
     sendNotifaction(msg + sender.url);
   }
 
+  if (request.msgType == "opencanary") {
+    let msg = "这个页面疑似OpenCanary蜜罐，请小心！";
+    setBlockInfo(sender.tab.id, sender.url, "OpenCanary hit", msg);
+    sendNotifaction(msg + sender.url);
+  }
+
   sendResponse(true);
 }
 

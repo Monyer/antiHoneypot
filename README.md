@@ -1,10 +1,11 @@
 # AntiHoneypot - 一个拦截蜜罐XSSI的Chrome扩展
 ## 说明
 这是一个带有学习和研究性质的Chrome扩展程序。
+
 ## 功能
 1. 截获页面中发起的XSSI请求，通过域名、URI、Query黑名单特征识别阻断可疑的XSSI（Jsonp Callback、XSS等）
 2. 对可疑URL进行深度检测，通过发送请求获取body内容，进行关键字匹配识别
-3. 分析页面JS，攫取蜜罐固有特征，识别蜜罐并拦截所有请求（HFish、Moan、Beef）
+3. 分析页面JS，攫取蜜罐固有特征，识别蜜罐并拦截所有请求（HFish、Moan、Beef、OpenCanary）
 4. 判断fingerprintjs库是否存在并提示
 5. 判断是否有其他针对Canvas、Font、Audio、WebGL的指纹相关调用
 6. 混淆Canvas、Font、Audio、WebGL的指纹，扰乱Fingerprint

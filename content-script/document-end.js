@@ -80,6 +80,30 @@ var injectEnd = function() {
       }, '*');
     }
 
+    /**
+     * openCanary
+     */
+    //opencanary
+    (function() {
+      var isOpenCanary = false;
+      if (document.title.includes("Synology RackStation")) {
+        var metas = document.getElementsByTagName("meta");
+        isOpenCanary = Object.keys(metas).some(
+          idx => metas[idx].name == "application-name" && metas[idx].content.includes("DemoSite")
+        );
+      }
+      if (!isOpenCanary) {
+        var h1s = document.getElementsByTagName("h1");
+        isOpenCanary = h1s.length == 1 && h1s[0].innerText == "Network Storage v5.13";
+      }
+      if (isOpenCanary) {
+        window.top.postMessage({
+          msgType: "opencanary",
+          msgData: ""
+        }, '*');
+      }
+    })();
+
   });
   document.documentElement.dataset.csescriptallow = true;
 };
