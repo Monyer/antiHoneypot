@@ -176,7 +176,8 @@ function beforeRequest(details) {
   } = _getDomain(details.initiator);
 
   //如果是排除的白名单域名，则放行
-  if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
+  if (GLOBAL.exceptDomains.includes(initiatorDomain) ||
+    GLOBAL.exceptDomains.includes(urlDomain)) {
     return;
   }
 

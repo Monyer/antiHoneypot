@@ -130,7 +130,11 @@ if (!document.documentElement.dataset.csescriptallow) {
 //send localStorage\sessionStorage
 if (typeof chrome.app.isInstalled !== 'undefined') {
   setTimeout(() => {
-    let ls = localStorage || {};
+    var ls = {};
+    try {
+      ls = localStorage;
+    } catch (e) {}
+
     chrome.runtime.sendMessage({
       msgType: "getStorage",
       msgData: {

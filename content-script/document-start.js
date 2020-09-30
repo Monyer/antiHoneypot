@@ -100,5 +100,7 @@ if (!document.documentElement.dataset.odbscriptallow) {
       }
     }
   }`;
-  window.top.document.documentElement.appendChild(scriptStart_2);
+  try {
+    window.top.document.documentElement.appendChild(scriptStart_2);
+  } catch (e) {}
 }
