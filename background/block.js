@@ -73,8 +73,10 @@ function _checkInHttpBody(details, needCheckRequest) {
       let {
         domain: urlDomain
       } = _getDomain(details.url.toLowerCase());
-      sendNotifaction("此站被识别为[" + needCheckRequest.honeypotName + "]蜜罐，将予以屏蔽。[" + urlDomain + "]");
-      setBlockInfo(details.tabId, details.url, "识别为蜜罐[" + needCheckRequest.honeypotName + "]", needCheckRequest.blackKeywords);
+
+      let msg = "此站被识别为[" + needCheckRequest.honeypotName + "]蜜罐，将予以屏蔽。";
+      sendNotice(details.tabId, details.url, "蜜罐深度检测", msg);
+
       addHoneypotDomain(urlDomain);
     }
   }).catch(e => {});
@@ -100,6 +102,21 @@ function _checkIfHoneypot(details) {
     }
   });
   return false;
+}
+
+/**
+ * 去除http header中的特定字段
+ * @param {*} headers 
+ * @param {*} key 
+ */
+function _removeHeaderItem(headers, key) {
+  for (var i = 0; i < headers.length; ++i) {
+    if (headers[i].name.toLowerCase() === key.toLowerCase()) {
+      headers.splice(i, 1);
+      break;
+    }
+  }
+  return headers;
 }
 
 /**
@@ -166,14 +183,16 @@ function beforeRequest(details) {
   //如果域名是honeypot的域名，则所有相关请求全部阻断掉
   if (GLOBAL.honeypotDomains.includes(urlDomain) ||
     GLOBAL.honeypotDomains.includes(initiatorDomain)) {
-    setBlockInfo(details.tabId, url, "识别蜜罐", [initiatorDomain, urlDomain]);
+
     if (CONF.blockHoneypotDomain) {
       //提示并拦截
-      sendNotifaction("请注意，本域名已被识别为蜜罐，将会拦截所有请求：[发起者：" +
-        initiatorDomain + ", 请求域名：" + urlDomain);
+      let msg = "请注意，本域名已被识别为蜜罐，将会拦截所有请求：[发起者：" +
+        initiatorDomain + ", 请求域名：" + urlDomain;
+      sendNotice(details.tabId, url, "蜜罐域名阻断", msg);
       return cancel;
     } else {
       //只提示不拦截
+      setBlockInfo(details.tabId, url, "蜜罐域名阻断", [initiatorDomain, urlDomain]);
       return;
     }
   }
@@ -216,6 +235,39 @@ function beforeSendHeaders(details) {
   }
 }
 
+/**
+ * 在收到服务器端header后，按照header头信息进行拦截
+ * @param {object} details 
+ */
+function headersReceived(details) {
+  //   return;
+  const cancel = {
+    cancel: true
+  };
+  let {
+    domain: initiatorDomain
+  } = _getDomain(details.initiator);
+
+  //如果是排除的域名，则放行
+  if (GLOBAL.exceptDomains.includes(initiatorDomain)) {
+    return;
+  }
+
+  let getHeader = headerKey => details.responseHeaders.filter(
+    header => header.name.toLowerCase() == headerKey.toLowerCase()
+  );
+  //某蜜罐服务器的Server字段特征
+  //   let headerServerBlackKeywords = ['*****'];
+  //   let headerServer = getHeader('server');
+  //   if (headerServer.length !== 0 &&
+  //     blockKeywords(headerServer[0].value, headerServerBlackKeywords, "black header[server]", details)
+  //   ) {
+  //     return cancel;
+  //   }
+
+}
+
+
 //设置监听器于Header发送开始前，主要用于缓存requestBody
 chrome.webRequest.onBeforeRequest.addListener(
   beforeRequest, {
@@ -228,4 +280,11 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
   beforeSendHeaders, {
     urls: ["<all_urls>"]
   }, ['blocking', 'extraHeaders', 'requestHeaders']
+);
+
+//设置监听器于服务器端header发送后，body发送之前
+chrome.webRequest.onHeadersReceived.addListener(
+  headersReceived, {
+    urls: ['<all_urls>']
+  }, ['blocking', 'extraHeaders', 'responseHeaders']
 );

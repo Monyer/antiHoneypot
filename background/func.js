@@ -71,6 +71,18 @@ function setBlockInfo(tabId, blockUrl, blockReason, blockInfo) {
 }
 
 /**
+ * 
+ * @param {*} tabId 
+ * @param {*} url 
+ * @param {*} reason 
+ * @param {*} info 
+ */
+function sendNotice(tabId, url, reason, msg) {
+  sendNotifaction(msg + url);
+  setBlockInfo(tabId, url, reason, msg);
+}
+
+/**
  * 判断content字符串中是否含有keywords中的关键词，返回true并添加拦截信息
  * @param {string} content 
  * @param {string[]} keywords 
