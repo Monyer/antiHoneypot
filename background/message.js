@@ -72,13 +72,13 @@ function onMessageCallback(request, sender, sendResponse) {
 
   //getClipboard
   if (request.msgType == "getClipboard" && CONF.getClipboardAlert) {
-    let msg = "剪切板粘贴取值提醒：这个网页调用了剪切板粘贴取值函数！";
+    let msg = "这个网页调用了剪切板粘贴取值函数！";
     sendNotice(sender.tab.id, sender.url, "打中getClipboard规则", msg);
   }
 
   //判断requestFileSystem的函数是否被调用
   if (request.msgType == "requestFileSystem" && CONF.requestFileSystemAlert) {
-    let msg = "FileSystem操作提醒：这个网页操作了FileSystem相关函数！[" + request.msgData.funcName + "]";
+    let msg = "这个网页操作了FileSystem相关函数！[" + request.msgData.funcName + "]";
     sendNotice(sender.tab.id, sender.url, "打中requestFileSystem规则", msg);
   }
 
