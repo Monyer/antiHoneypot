@@ -129,6 +129,12 @@ function onMessageCallback(request, sender, sendResponse) {
     sendNotice(sender.tab.id, sender.url, "打中OpenCanary规则", msg);
   }
 
+  //判断是否hfish
+  if (request.msgType == "hfish") {
+    let msg = "这个页面疑似HFish蜜罐，请小心！";
+    sendNotice(sender.tab.id, sender.url, "打中HFish规则："+request.msgData, msg);
+  }
+
   sendResponse(true);
 }
 

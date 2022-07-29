@@ -31,20 +31,22 @@ function setIconStatus(tabId) {
     };
   }
   tabExists(tabId, function() {
-    if (!GLOBAL.blockTabs[tabId] || GLOBAL.blockTabs[tabId].length <= 1) {
-      chrome.browserAction.setIcon({
-        path: iconPath,
-        tabId: tabId
-      });
-    }
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: badgeColor,
-      tabId: tabId
-    });
-    chrome.browserAction.setBadgeText({
-      text: badgeText,
-      tabId: tabId
-    });
+    setTimeout((tabId)=>{
+        if (!GLOBAL.blockTabs[tabId] || GLOBAL.blockTabs[tabId].length <= 1) {
+          chrome.browserAction.setIcon({
+            path: iconPath,
+            tabId: tabId
+          });
+        }
+        chrome.browserAction.setBadgeBackgroundColor({
+          color: badgeColor,
+          tabId: tabId
+        });
+        chrome.browserAction.setBadgeText({
+          text: badgeText,
+          tabId: tabId
+        });
+    },100);
   });
 }
 

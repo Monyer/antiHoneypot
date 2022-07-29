@@ -257,6 +257,11 @@ function headersReceived(details) {
   let getHeader = headerKey => details.responseHeaders.filter(
     header => header.name.toLowerCase() == headerKey.toLowerCase()
   );
+
+  if(details.type=='main_frame' && details.responseHeaders.length<=3){
+    setBlockInfo(details.tabId, details.url, "服务器返回了过少的header字段", "header字段数量:"+details.responseHeaders.length);
+  }
+
   //某蜜罐服务器的Server字段特征
   //   let headerServerBlackKeywords = ['*****'];
   //   let headerServer = getHeader('server');
