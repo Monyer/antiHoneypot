@@ -199,7 +199,7 @@ function beforeRequest(details) {
   }
 
   //检测是不是蜜罐，通过URL关键词，以及二次请求body中的内容关键词，需要放在_greenLight之前
-  if (_checkIfHoneypot(details)) {
+  if (!KEYWORDLIST.whiteXssiDomains.includes(urlDomain) || _checkIfHoneypot(details)) {
     addHoneypotDomain(urlDomain);
     addHoneypotDomain(initiatorDomain);
     return cancel;
