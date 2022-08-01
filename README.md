@@ -1,4 +1,4 @@
-# AntiHoneypot - 一个拦截蜜罐XSSI的Chrome扩展
+# AntiHoneypot - 一个拦截XSSI & 识别Web蜜罐的Chrome扩展
 ## 说明
 这是一个带有学习和研究性质的Chrome扩展程序。
 

@@ -1,5 +1,5 @@
 window.addEventListener("message", function(e) {
-  if (!e.data || !e.data.msgType || typeof chrome.app.isInstalled == 'undefined') {
+  if (!e.data || !e.data.msgType || !chrome.app || !chrome.app.isInstalled) {
     return;
   }
   if (e.data.msgType == "indexedDB") {
