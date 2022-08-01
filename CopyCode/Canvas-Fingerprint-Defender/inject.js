@@ -1,4 +1,5 @@
 var injectCanvas = function() {
+  /* Chrome Extension antiHoneypot inject JS for Canvas Fingerprint confuse */
   const toBlob = HTMLCanvasElement.prototype.toBlob;
   const toDataURL = HTMLCanvasElement.prototype.toDataURL;
   const getImageData = CanvasRenderingContext2D.prototype.getImageData;
@@ -58,7 +59,7 @@ var injectCanvas = function() {
 };
 
 var scriptCanvas_1 = document.createElement('script');
-scriptCanvas_1.textContent = "(" + injectCanvas + ")()";
+scriptCanvas_1.textContent = "(" + injectCanvas + ")()"; 
 document.documentElement.appendChild(scriptCanvas_1);
 
 if (!document.documentElement.dataset.cbscriptallow) {

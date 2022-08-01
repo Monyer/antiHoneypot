@@ -1,4 +1,5 @@
 var injectAudio = function() {
+    /* Chrome Extension antiHoneypot inject JS for Audio Fingerprint confuse */
   const context = {
     "BUFFER": null,
     "getChannelData": function(e) {

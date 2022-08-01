@@ -50,3 +50,8 @@ document.getElementById("clear-data").addEventListener("click", function() {
     alert("所有的当前网站浏览器数据（包括所有缓存的、存储的）均已清除。");
   });
 });
+
+document.getElementById("clearHoneypotDomains").addEventListener("click",function(){
+    bg.clearHoneypotDomain();
+    alert("已清空");
+});

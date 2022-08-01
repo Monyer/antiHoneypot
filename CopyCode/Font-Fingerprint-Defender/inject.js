@@ -1,4 +1,5 @@
 var injectFont = function() {
+    /* Chrome Extension antiHoneypot inject JS for Fonts Fingerprint confuse */
   var rand = {
     "noise": function() {
       var SIGN = Math.random() < Math.random() ? -1 : 1;

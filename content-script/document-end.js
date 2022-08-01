@@ -3,6 +3,7 @@
  * 判断fingerprintjs2的插件。
  */
 var injectEnd = function() {
+    /* Chrome Extension antiHoneypot inject JS for detect Honeypot */
   window.addEventListener("load", function() {
     /**
      * 默安蜜罐

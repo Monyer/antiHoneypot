@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "AntiHoneypot",
-    "version": "0.7.1",
+    "version": "0.7.2",
     "description": "蜜罐识别和JSONP阻断",
     "browser_action": {
         "default_icon": "icon/icon32b.png",

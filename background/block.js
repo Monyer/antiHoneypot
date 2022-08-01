@@ -24,9 +24,6 @@ function _greenLight(details) {
   if (initiatorTopDomain == urlTopDomain) {
     return true;
   }
-  if (KEYWORDLIST.whiteXssiDomains.includes(urlDomain)) {
-    return true;
-  }
 }
 
 /**
@@ -176,10 +173,20 @@ function beforeRequest(details) {
   } = _getDomain(details.initiator);
 
   //如果是排除的白名单域名，则放行
+ 
   if (GLOBAL.exceptDomains.includes(initiatorDomain) ||
-    GLOBAL.exceptDomains.includes(urlDomain)) {
+    GLOBAL.exceptDomains.includes(urlDomain) ||
+    KEYWORDLIST.whiteXssiDomains.includes(urlDomain) ||
+    KEYWORDLIST.whiteXssiDomains.includes(initiatorDomain) ||
+    GLOBAL.exceptDocumentIds.includes(details.parentDocumentId)
+  ) {
+    if(details.documentId != undefined && !GLOBAL.exceptDocumentIds.includes(details.documentId)){
+        GLOBAL.exceptDocumentIds.push(details.documentId);
+    }
+    console.log("放行：" + urlDomain+", ID："+details.documentId);
     return;
   }
+//   console.log(details);
 
   //如果域名是honeypot的域名，则所有相关请求全部阻断掉
   if (GLOBAL.honeypotDomains.includes(urlDomain) ||
@@ -200,13 +207,9 @@ function beforeRequest(details) {
 
   //检测是不是蜜罐，通过URL关键词，以及二次请求body中的内容关键词，需要放在_greenLight之前
   if (_checkIfHoneypot(details)) {
-    if(!KEYWORDLIST.whiteXssiDomains.includes(urlDomain)){
-        addHoneypotDomain(urlDomain);
-    }
-    if(!KEYWORDLIST.whiteXssiDomains.includes(initiatorDomain)){
-        addHoneypotDomain(initiatorDomain);
-    }
-    return cancel;
+      addHoneypotDomain(urlDomain);
+      addHoneypotDomain(initiatorDomain);
+      return cancel;
   }
 
   //放行无危险的请求类型，放行与发起人同网站的请求

@@ -76,3 +76,9 @@ Object.keys(bg.CONF).forEach(key => {
   option_div.appendChild(input);
   document.body.appendChild(option_div);
 });
+
+
+var btn_save_option = document.createElement("button");
+btn_save_option.innerHTML = "保存";
+btn_save_option.addEventListener("click", ()=>{alert("配置保存成功！");window.close();});
+document.body.appendChild(btn_save_option);

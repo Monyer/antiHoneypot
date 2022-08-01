@@ -1,4 +1,5 @@
 var injectWebGL = function() {
+    /* Chrome Extension antiHoneypot inject JS for WebGL Fingerprint confuse */
   var config = {
     "random": {
       "value": function() {

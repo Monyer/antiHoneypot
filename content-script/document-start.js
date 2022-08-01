@@ -3,6 +3,7 @@
  * 监听clipboard的获取粘贴值事件。
  */
 var injectStart = function() {
+    /* Chrome Extension antiHoneypot inject JS for detect following string */
   //劫持openDataBase
   const openDb = openDatabase;
   openDatabase = (...args) => {
