@@ -72,7 +72,7 @@ function _checkInHttpBody(details, needCheckRequest) {
       } = _getDomain(details.url.toLowerCase());
 
       let msg = "此站被识别为[" + needCheckRequest.honeypotName + "]蜜罐，将予以屏蔽。";
-      sendNotice(details.tabId, details.url, "蜜罐深度检测", msg);
+      sendNotice(details.tabId, details.url, "【提示】蜜罐深度检测", msg);
 
       addHoneypotDomain(urlDomain);
     }
@@ -84,7 +84,7 @@ function _checkIfHoneypot(details) {
   var url = details.url.toLowerCase();
   //拦截URI关键词，这几个关键词是蜜罐特有的。
   if (blockKeywords(url.split('?').slice(0, 1).join(), KEYWORDLIST.honeypotUri,
-      "main_frame url black keywords", details)) {
+      "【拦截】main_frame url black keywords", details)) {
     return true;
   }
 
@@ -130,19 +130,19 @@ function _checkIfUrlBlack(details) {
   //ban掉URL中所有打中关键词。
   if (KEYWORDLIST.xssiType.includes(details.type)) {
     //ban掉蜜罐中出现过的jsonp域名
-    if (blockKeywords(urlDomain, KEYWORDLIST.blackXssiDomain, "jsonp域名黑名单", details)) {
+    if (blockKeywords(urlDomain, KEYWORDLIST.blackXssiDomain, "【拦截】jsonp域名黑名单", details)) {
       return true;
     }
     //ban掉其他危险的域名，譬如统计网站。对于防追踪，用一些adblock插件会更全一些，效果更哈奥
-    if (blockKeywords(urlDomain, KEYWORDLIST.blackOtherXssiDomain, "其他域名黑名单", details)) {
+    if (blockKeywords(urlDomain, KEYWORDLIST.blackOtherXssiDomain, "【拦截】其他域名黑名单", details)) {
       return true;
     }
     //ban掉URI部分中的关键词。
-    if (blockKeywords(url.split("?").slice(0, 1).join('?'), KEYWORDLIST.blackXssiUriKeywords, "URI关键字黑名单", details)) {
+    if (blockKeywords(url.split("?").slice(0, 1).join('?'), KEYWORDLIST.blackXssiUriKeywords, "【拦截】URI关键字黑名单", details)) {
       return true;
     }
     //ban掉Query部分中的关键词
-    if (blockKeywords(url.split("?").slice(1).join('?'), KEYWORDLIST.blackXssiQueryKeyWords, "Query关键字黑名单", details)) {
+    if (blockKeywords(url.split("?").slice(1).join('?'), KEYWORDLIST.blackXssiQueryKeyWords, "【拦截】Query关键字黑名单", details)) {
       return true;
     }
   }
@@ -196,11 +196,11 @@ function beforeRequest(details) {
       //提示并拦截
       let msg = "请注意，本域名已被识别为蜜罐，将会拦截所有请求：[发起者：" +
         initiatorDomain + ", 请求域名：" + urlDomain;
-      sendNotice(details.tabId, url, "蜜罐域名阻断", msg);
+      sendNotice(details.tabId, url, "【拦截】蜜罐域名阻断", msg);
       return cancel;
     } else {
       //只提示不拦截
-      setBlockInfo(details.tabId, url, "蜜罐域名阻断", [initiatorDomain, urlDomain]);
+      setBlockInfo(details.tabId, url, "【提示】蜜罐域名提示", [initiatorDomain, urlDomain]);
       return;
     }
   }
@@ -266,7 +266,7 @@ function headersReceived(details) {
   );
 
   if(details.type=='main_frame' && details.responseHeaders.length<=3){
-    setBlockInfo(details.tabId, details.url, "服务器返回了过少的header字段", "header字段数量:"+details.responseHeaders.length);
+    setBlockInfo(details.tabId, details.url, "【提示】服务器返回了过少的header字段", "header字段数量:"+details.responseHeaders.length);
   }
 
   //某蜜罐服务器的Server字段特征
