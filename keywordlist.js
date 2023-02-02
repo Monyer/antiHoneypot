@@ -10,6 +10,12 @@ KEYWORDLIST.whiteXssiDomains = [
   "translate.google.cn",
   "fofa.info",
   "gblobscdn.gitbook.com",
+  "map.baidu.com",
+  "ditu.baidu.com",
+  "map.google.com",
+  "map.qq.com",
+  "ditu.qq.com",
+  "ditu.amap.com",
 ];
 //需要检查的请求类型
 KEYWORDLIST.xssiType = ["script", "xmlhttprequest", "sub_frame"];
